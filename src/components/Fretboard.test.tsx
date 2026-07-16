@@ -78,6 +78,46 @@ describe("Fretboard colorMode=degree", () => {
   });
 });
 
+describe("Fretboard overlay", () => {
+  const scale = scaleNoteMap("A", "minorPentatonic"); // A C D E G
+  const chord = chordNoteMap("A", "7");               // A C# E G
+
+  it("dims scale-only notes and colors chord tones by degree", () => {
+    const { container } = render(
+      <Fretboard notes={scale} labelMode="name" window={null} overlay={chord} />
+    );
+    const bg = container.querySelector("[data-testid='note-6-8']"); // C — 스케일 전용
+    expect(bg?.getAttribute("data-layer")).toBe("scale");
+    expect(bg?.querySelector("circle")?.getAttribute("fill")).toBe("var(--note-dim)");
+    expect(bg?.getAttribute("opacity")).toBe("0.45");
+    const tone = container.querySelector("[data-testid='note-6-3']"); // G — b7
+    expect(tone?.getAttribute("data-layer")).toBe("overlay");
+    expect(tone?.querySelector("circle")?.getAttribute("fill")).toBe("var(--tone-7)");
+  });
+
+  it("shows chord tones outside the scale (C# over A minor pentatonic)", () => {
+    const { container } = render(
+      <Fretboard notes={scale} labelMode="name" window={null} overlay={chord} />
+    );
+    const outside = container.querySelector("[data-testid='note-6-9']"); // C# — 스케일 밖 3음
+    expect(outside?.getAttribute("data-layer")).toBe("overlay");
+    expect(outside?.querySelector("circle")?.getAttribute("fill")).toBe("var(--tone-3)");
+    expect(outside?.querySelector("text")?.textContent).toBe("C#");
+  });
+
+  it("rings only the chord root, not the background scale root", () => {
+    const e7 = chordNoteMap("E", "7"); // E G# B D — A는 스케일 전용이 됨
+    const { container } = render(
+      <Fretboard notes={scale} labelMode="name" window={null} overlay={e7} />
+    );
+    expect(container.querySelector("[data-testid='note-6-0'] circle")?.getAttribute("stroke"))
+      .toBe("var(--note-root-ring)"); // E — 코드 루트
+    const scaleRoot = container.querySelector("[data-testid='note-6-5']"); // A — 스케일 루트
+    expect(scaleRoot?.getAttribute("data-layer")).toBe("scale");
+    expect(scaleRoot?.querySelector("circle")?.getAttribute("stroke")).toBe("none");
+  });
+});
+
 describe("Fretboard quiz interaction", () => {
   const empty = new Map();
 

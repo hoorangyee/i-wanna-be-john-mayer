@@ -22,6 +22,7 @@ export interface FretboardProps {
   onPositionClick?: (pos: FretPos) => void;
   marks?: ReadonlyMap<string, QuizMark>;
   activeRegion?: { strings: readonly StringNo[]; fretMax: number } | null;
+  overlay?: Map<PitchClass, NoteInfo>;
 }
 
 const W = 1180;
@@ -53,7 +54,7 @@ const fretX = (fret: number) => NUT_X + fret * FRET_W;          // 프렛선 x
 const noteX = (fret: number) =>
   fret === 0 ? OPEN_X : NUT_X + (fret - 0.5) * FRET_W;          // 노트 중심 x
 
-export function Fretboard({ notes, labelMode, window = null, colorMode = "root", interactive = false, interactivePositions, onPositionClick, marks, activeRegion = null }: FretboardProps) {
+export function Fretboard({ notes, labelMode, window = null, colorMode = "root", interactive = false, interactivePositions, onPositionClick, marks, activeRegion = null, overlay }: FretboardProps) {
   const midY = (stringY(3) + stringY(4)) / 2;
 
   return (
@@ -110,25 +111,33 @@ export function Fretboard({ notes, labelMode, window = null, colorMode = "root",
       {/* 노트 */}
       {STRINGS.flatMap((str) =>
         Array.from({ length: FRET_COUNT + 1 }, (_, fret) => {
-          const info = notes.get(pitchAt({ str, fret }));
+          const pc = pitchAt({ str, fret });
+          const overlayInfo = overlay?.get(pc);
+          const info = overlayInfo ?? notes.get(pc);
           if (!info) return null;
+          const isOverlayNote = overlayInfo !== undefined;
           const dimmed = window ? fret < window.start || fret > window.end : false;
           const label = labelMode === "name" ? info.name
                       : labelMode === "degree" ? info.degree : null;
+          const fill = isOverlayNote
+            ? degreeFill(info.degree)
+            : overlay
+              ? "var(--note-dim)"
+              : colorMode === "degree"
+                ? degreeFill(info.degree)
+                : info.isRoot ? "var(--note-root)" : "var(--note-scale)";
+          const ring = info.isRoot && (!overlay || isOverlayNote);
           return (
             <g key={`${str}-${fret}`}
                data-testid={`note-${str}-${fret}`}
                data-root={info.isRoot ? "true" : "false"}
                data-dimmed={dimmed ? "true" : "false"}
-               opacity={dimmed ? 0.18 : 1}>
+               {...(overlay ? { "data-layer": isOverlayNote ? "overlay" : "scale" } : {})}
+               opacity={dimmed ? 0.18 : overlay && !isOverlayNote ? 0.45 : 1}>
               <circle cx={noteX(fret)} cy={stringY(str)} r={12}
-                      fill={
-                        colorMode === "degree"
-                          ? degreeFill(info.degree)
-                          : info.isRoot ? "var(--note-root)" : "var(--note-scale)"
-                      }
-                      stroke={info.isRoot ? "var(--note-root-ring)" : "none"}
-                      strokeWidth={info.isRoot ? 3 : 0} />
+                      fill={fill}
+                      stroke={ring ? "var(--note-root-ring)" : "none"}
+                      strokeWidth={ring ? 3 : 0} />
               {label && (
                 <text x={noteX(fret)} y={stringY(str) + 4} textAnchor="middle"
                       className="note-label">
