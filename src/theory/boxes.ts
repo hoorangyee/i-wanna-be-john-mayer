@@ -1,5 +1,5 @@
 import { type Key, keyToPc } from "./notes";
-import { TUNING } from "./fretboard";
+import { FRET_COUNT, TUNING } from "./fretboard";
 import { SCALES, type ScaleId } from "./scales";
 
 export interface FretWindow {
@@ -24,14 +24,18 @@ export function boxesFor(key: Key, scaleId: ScaleId): FretWindow[] | null {
   const pcs = SCALES[anchorScaleId].intervals.map((i) => (root + i) % 12);
 
   // 6번 줄에서 각 스케일 톤이 나오는 프렛 (0..11)
-  const anchorFrets = pcs
-    .map((pc) => (((pc - TUNING[6]) % 12) + 12) % 12)
-    .sort((a, b) => a - b);
+  const anchorFrets = pcs.map((pc) => (((pc - TUNING[6]) % 12) + 12) % 12);
 
   // 루트 앵커부터 시작하도록 순환 정렬 (루트보다 낮은 앵커는 +12)
   const rootFret = (((root - TUNING[6]) % 12) + 12) % 12;
   const rotated = anchorFrets.map((f) => (f < rootFret ? f + 12 : f));
   rotated.sort((a, b) => a - b);
 
-  return rotated.map((start) => ({ start, end: start + BOX_SPAN }));
+  return rotated.map((anchor) => {
+    const start =
+      anchor + BOX_SPAN > FRET_COUNT && anchor - 12 >= 0
+        ? anchor - 12
+        : anchor;
+    return { start, end: start + BOX_SPAN };
+  });
 }
