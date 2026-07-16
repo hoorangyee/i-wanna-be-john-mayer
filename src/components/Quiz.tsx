@@ -8,6 +8,24 @@ import {
 import { accuracy, avgMs, emptyStats, loadStats, recordResult, type QuizModeId, type QuizStats } from "@/quiz/stats";
 import { Fretboard, type QuizMark } from "./Fretboard";
 
+function CheckIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  );
+}
+
+function XIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  );
+}
+
 export interface QuizProps {
   makeQuestion?: typeof makeNameQuestion;
   makeTarget?: typeof makeFindAllTarget;
@@ -169,89 +187,112 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
   const avg = avgMs(m);
 
   return (
-    <section className="board">
-      <div className="quiz-settings">
-        <div className="seg" role="group" aria-label="출제 현">
-          {STRINGS.map((s) => (
-            <button key={s} data-active={range.strings.includes(s)}
-                    aria-pressed={range.strings.includes(s)}
-                    onClick={() => toggleString(s)}>
-              {s}번
-            </button>
-          ))}
+    <>
+      <div className="card mb-4 flex min-h-[76px] flex-wrap items-end gap-x-5 gap-y-3 px-4 py-3">
+        <div className="field">
+          <span>출제 현</span>
+          <div className="seg" role="group" aria-label="출제 현">
+            {STRINGS.map((s) => (
+              <button key={s} type="button" data-active={range.strings.includes(s)}
+                      aria-pressed={range.strings.includes(s)}
+                      onClick={() => toggleString(s)}>
+                {s}번
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="seg" role="group" aria-label="퀴즈 종류">
-          {QUIZ_MODES.map(({ id, label }) => (
-            <button key={id} data-active={quizMode === id} aria-pressed={quizMode === id}
-                    onClick={() => switchQuizMode(id)}>
-              {label}
-            </button>
-          ))}
+
+        <div className="field">
+          <span>퀴즈 종류</span>
+          <div className="seg" role="group" aria-label="퀴즈 종류">
+            {QUIZ_MODES.map(({ id, label }) => (
+              <button key={id} type="button" data-active={quizMode === id} aria-pressed={quizMode === id}
+                      onClick={() => switchQuizMode(id)}>
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
-        <label>
+
+        <label className="field">
           프렛 범위
           <select id="quiz-fret-max" value={range.fretMax}
                   onChange={(e) => changeFretMax(Number(e.target.value))}>
             {FRET_MAX_OPTIONS.map((f) => <option key={f} value={f}>0~{f}</option>)}
           </select>
         </label>
-        <button ref={primaryBtnRef} className="primary" onClick={quizMode === "nameThatNote" ? ask : startFind}>
-          {(quizMode === "nameThatNote" ? question : target) ? "다음 문제" : "시작"}
-        </button>
-        {quizMode === "findAll" && target && !roundOver && (
-          <button className="secondary" onClick={giveUp}>정답 보기</button>
-        )}
+
+        <div className="ml-auto flex items-center gap-2 self-end">
+          {quizMode === "findAll" && target && !roundOver && (
+            <button type="button" className="btn-ghost" onClick={giveUp}>정답 보기</button>
+          )}
+          <button ref={primaryBtnRef} type="button" className="btn-primary"
+                  onClick={quizMode === "nameThatNote" ? ask : startFind}>
+            {(quizMode === "nameThatNote" ? question : target) ? "다음 문제" : "시작"}
+          </button>
+        </div>
       </div>
 
-      <h2 className="view-title">
-        {quizMode === "nameThatNote"
-          ? question ? "이 위치의 음이름은?" : "퀴즈 — 이 음은?"
-          : target
-            ? `지판에서 모든 ${target.name}을 클릭하세요 (${found.size}/${target.positions.length})`
-            : "퀴즈 — 모두 찾기"}
-      </h2>
-
-      {quizMode === "findAll" && target && !roundOver && (
-        <p className="sr-only">
-          지판의 클릭 영역을 Tab으로 이동하고 Enter로 선택하세요. 목표: 모든 {target.name} 찾기.
-        </p>
-      )}
-
-      <Fretboard notes={EMPTY_NOTES} labelMode="none" window={null} marks={marks}
-                 interactive={quizMode === "findAll" && target !== null && !roundOver}
-                 interactivePositions={rangeKeys}
-                 onPositionClick={handlePositionClick} activeRegion={range} />
-
-      {quizMode === "nameThatNote" && question && (
-        <div className="quiz-answers">
-          {question.choices.map((c) => (
-            <button key={c} className="choice"
-                    data-state={picked === null ? "idle" : c === question.answer ? "correct" : c === picked ? "wrong" : "idle"}
-                    disabled={picked !== null}
-                    onClick={() => answer(c)}>
-              {c}
-            </button>
-          ))}
+      <section className="card">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line px-5 py-3.5">
+          <h2 className="view-title text-[17px] font-semibold tracking-tight">
+            {quizMode === "nameThatNote"
+              ? question ? "이 위치의 음이름은?" : "퀴즈 — 이 음은?"
+              : target
+                ? `지판에서 모든 ${target.name}을 클릭하세요 (${found.size}/${target.positions.length})`
+                : "퀴즈 — 모두 찾기"}
+          </h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="chip">이번 세션 {session[quizMode].correct}/{session[quizMode].asked}</span>
+            {acc !== null && avg !== null && (
+              <>
+                <span className="chip">누적 정답률 {Math.round(acc * 100)}%</span>
+                <span className="chip">평균 {(avg / 1000).toFixed(1)}초</span>
+              </>
+            )}
+          </div>
         </div>
-      )}
 
-      {quizMode === "nameThatNote" && picked !== null && question && (
-        <p className="quiz-feedback" role="status" data-correct={picked === question.answer}>
-          {picked === question.answer ? "정답!" : `오답 — 정답은 ${question.answer}`}
-        </p>
-      )}
+        {quizMode === "findAll" && target && !roundOver && (
+          <p className="sr-only">
+            지판의 클릭 영역을 Tab으로 이동하고 Enter로 선택하세요. 목표: 모든 {target.name} 찾기.
+          </p>
+        )}
 
-      {quizMode === "findAll" && target && roundOver && (
-        <p className="quiz-feedback" role="status" data-correct={roundComplete && misses.size === 0}>
-          {revealed ? "정답 공개" : misses.size === 0 ? "완벽!" : `완료 — 실수 ${misses.size}회`}
-        </p>
-      )}
+        <div className="board-scroll px-5 py-4">
+          <Fretboard notes={EMPTY_NOTES} labelMode="none" window={null} marks={marks}
+                     interactive={quizMode === "findAll" && target !== null && !roundOver}
+                     interactivePositions={rangeKeys}
+                     onPositionClick={handlePositionClick} activeRegion={range} />
+        </div>
 
-      <p className="quiz-stats">
-        이번 세션 {session[quizMode].correct}/{session[quizMode].asked}
-        {acc !== null && avg !== null &&
-          ` · 누적 정답률 ${Math.round(acc * 100)}% · 평균 ${(avg / 1000).toFixed(1)}초`}
-      </p>
-    </section>
+        {quizMode === "nameThatNote" && question && (
+          <div className="flex flex-wrap gap-3 px-5 pb-4">
+            {question.choices.map((c) => (
+              <button key={c} type="button" className="choice"
+                      data-state={picked === null ? "idle" : c === question.answer ? "correct" : c === picked ? "wrong" : "idle"}
+                      disabled={picked !== null}
+                      onClick={() => answer(c)}>
+                {c}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {quizMode === "nameThatNote" && picked !== null && question && (
+          <p className="quiz-feedback px-5 pb-4" role="status" data-correct={picked === question.answer}>
+            {picked === question.answer ? <CheckIcon /> : <XIcon />}
+            {picked === question.answer ? "정답!" : `오답 — 정답은 ${question.answer}`}
+          </p>
+        )}
+
+        {quizMode === "findAll" && target && roundOver && (
+          <p className="quiz-feedback px-5 pb-4" role="status" data-correct={roundComplete && misses.size === 0}>
+            {roundComplete && misses.size === 0 ? <CheckIcon /> : <XIcon />}
+            {revealed ? "정답 공개" : misses.size === 0 ? "완벽!" : `완료 — 실수 ${misses.size}회`}
+          </p>
+        )}
+      </section>
+    </>
   );
 }
