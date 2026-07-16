@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Key } from "@/theory/notes";
 import { scaleNoteMap, SCALES, type ScaleId } from "@/theory/scales";
 import { chordNoteMap, CHORDS, type ChordId } from "@/theory/chords";
@@ -8,25 +8,30 @@ import { boxesFor } from "@/theory/boxes";
 import { Fretboard, type LabelMode } from "@/components/Fretboard";
 import { Controls, type Mode } from "@/components/Controls";
 import { Quiz } from "@/components/Quiz";
+import { parseViewQuery, viewQueryString, type UrlViewState } from "@/lib/viewUrl";
 
-interface ViewState {
-  mode: Mode;
-  keySel: Key;
-  scaleId: ScaleId;
-  chordId: ChordId;
-  labelMode: LabelMode;
-  boxIndex: number | null;
-}
+const DEFAULT_VIEW: UrlViewState = {
+  mode: "scale",
+  keySel: "A",
+  scaleId: "minorPentatonic",
+  chordId: "7",
+  labelMode: "name",
+  boxIndex: null,
+};
 
 export default function Home() {
-  const [view, setView] = useState<ViewState>({
-    mode: "scale",
-    keySel: "A",
-    scaleId: "minorPentatonic",
-    chordId: "7",
-    labelMode: "name",
-    boxIndex: null,
-  });
+  const [view, setView] = useState<UrlViewState>(DEFAULT_VIEW);
+
+  // 마운트 시 URL → 상태 (SSR/하이드레이션 후 1회)
+  useEffect(() => {
+    setView(parseViewQuery(window.location.search, DEFAULT_VIEW));
+  }, []);
+
+  // 상태 → URL (북마크 가능, 히스토리 오염 없이 replace)
+  useEffect(() => {
+    const q = viewQueryString(view, DEFAULT_VIEW);
+    window.history.replaceState(null, "", q || window.location.pathname);
+  }, [view]);
 
   const isChord = view.mode === "chord";
   const isQuiz = view.mode === "quiz";
