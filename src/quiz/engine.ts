@@ -44,10 +44,13 @@ export interface NameQuestion {
 export function makeNameQuestion(range: QuizRange, rng: Rng = Math.random): NameQuestion {
   const pos = pick(rangePositionsOrThrow(range), rng);
   const answer = canonicalName(pitchAt(pos));
-  const wrong = new Set<string>();
-  while (wrong.size < 3) {
-    const name = canonicalName(Math.floor(rng() * 12));
-    if (name !== answer) wrong.add(name);
+  // answer를 제외한 11개 후보에서 rng로 3개 선택 (부분 Fisher–Yates, 항상 유한)
+  const candidates: string[] = KEYS.filter((n) => n !== answer);
+  const wrong: string[] = [];
+  for (let i = 0; i < 3; i++) {
+    const j = i + Math.floor(rng() * (candidates.length - i));
+    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+    wrong.push(candidates[i]);
   }
   const choices = [...wrong, answer];
   for (let i = choices.length - 1; i > 0; i--) {
