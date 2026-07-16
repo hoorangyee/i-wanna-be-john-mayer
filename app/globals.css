@@ -4,15 +4,15 @@
 
 /* ── 디자인 토큰: 라이트 (기본) ─────────────────────────────── */
 :root {
-  --bg: #faf8f4;
+  --bg: #f6f7f9;
   --surface: #ffffff;
-  --surface-2: #f4f1ea;
-  --line: #e4e0d8;
-  --ink: #2b2a27;
-  --ink-muted: #7a756c;
-  --accent: #d96c3d;
+  --surface-2: #eef0f4;
+  --line: #e2e5ea;
+  --ink: #1f2430;
+  --ink-muted: #6b7280;
+  --accent: #4f46e5;
   --accent-ink: #ffffff;
-  --shadow-card: 0 1px 2px rgb(43 42 39 / 0.04), 0 4px 16px rgb(43 42 39 / 0.06);
+  --shadow-card: 0 1px 2px rgb(31 36 48 / 0.04), 0 4px 16px rgb(31 36 48 / 0.06);
 
   --fb-nut: #8a8478;
   --fb-fret: #c9c3b8;
@@ -32,16 +32,16 @@
   --mark-reveal: #9aa0ab;
 }
 
-/* ── 디자인 토큰: 다크 (웜 차콜) ────────────────────────────── */
+/* ── 디자인 토큰: 다크 (쿨 뉴트럴) ────────────────────────────── */
 :root[data-theme="dark"] {
-  --bg: #1c1a17;
-  --surface: #26231e;
-  --surface-2: #2e2a24;
-  --line: #3b362e;
-  --ink: #ece7de;
-  --ink-muted: #a39d90;
-  --accent: #e8834f;
-  --accent-ink: #2a1608;
+  --bg: #14161c;
+  --surface: #1c1f27;
+  --surface-2: #242834;
+  --line: #323848;
+  --ink: #e6e8ee;
+  --ink-muted: #9aa1b0;
+  --accent: #818cf8;
+  --accent-ink: #14161c;
   --shadow-card: 0 0 0 1px rgb(255 255 255 / 0.04);
 
   --fb-nut: #6f685b;
