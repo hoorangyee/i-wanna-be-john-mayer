@@ -46,4 +46,12 @@ describe("ThemeToggle", () => {
     render(<ThemeToggle />);
     expect(document.documentElement.dataset.theme).toBe("dark");
   });
+
+  it("applies a persisted preference on mount even when it differs from the OS", () => {
+    window.localStorage.setItem("fretboard-theme", "dark");
+    stubMatchMedia(false); // OS 라이트
+    const { getByRole } = render(<ThemeToggle />);
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(getByRole("button", { name: "테마: 다크" })).not.toBeNull();
+  });
 });

@@ -39,33 +39,37 @@ function MoonIcon() {
 }
 
 export function ThemeToggle() {
-  const [pref, setPref] = useState<ThemePref>("system");
+  // null = 저장된 선호 로드 전 — 이때는 FOUC 스크립트가 설정한 data-theme을 건드리지 않는다
+  const [pref, setPref] = useState<ThemePref | null>(null);
 
   useEffect(() => {
     setPref(loadThemePref()); // SSR 하이드레이션 후 실제 설정 반영
   }, []);
 
-  // 시스템 모드일 때만 OS 테마 변경을 실시간 반영
+  // pref 확정/변경 시 해석값 적용, 시스템 모드일 때만 OS 테마 변경을 실시간 반영
   useEffect(() => {
-    if (pref !== "system") return;
+    if (pref === null) return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
-    const sync = () => applyTheme(resolveTheme("system", mq.matches));
+    const sync = () => applyTheme(resolveTheme(pref, mq.matches));
     sync();
+    if (pref !== "system") return;
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, [pref]);
 
   const cycle = () => {
-    const next = nextThemePref(pref);
+    const next = nextThemePref(pref ?? "system");
     setPref(next);
     saveThemePref(next);
-    applyTheme(resolveTheme(next, window.matchMedia("(prefers-color-scheme: dark)").matches));
+    // applyTheme은 위 이펙트가 pref 변경에 반응해 수행 — 중복 적용 제거
   };
 
+  const label = LABELS[pref ?? "system"];
+
   return (
-    <button type="button" className="icon-btn" aria-label={LABELS[pref]} title={LABELS[pref]}
+    <button type="button" className="icon-btn" aria-label={label} title={label}
             onClick={cycle}>
-      {pref === "system" ? <SystemIcon /> : pref === "light" ? <SunIcon /> : <MoonIcon />}
+      {(pref ?? "system") === "system" ? <SystemIcon /> : pref === "light" ? <SunIcon /> : <MoonIcon />}
     </button>
   );
 }
