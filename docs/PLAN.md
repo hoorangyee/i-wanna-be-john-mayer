@@ -181,7 +181,27 @@ spell(pc: PitchClass, keyContext: Key): string
 - ~~오버레이 대비 seam~~ → `Fretboard`의 `colorMode` prop으로 해결 (도수 정보가 이미 NoteInfo에 있음)
 - ~~잔여 정리~~ → M2 Task 1에서 일괄 처리 완료
 
-### M2 → M3 이관 (2026-07-16 최종 리뷰 결과)
+### M3 완료 (2026-07-16) — 퀴즈 모드
+- F4 완료: [퀴즈] 탭 — 모드 A "이 음은?"(4지선다) + 모드 B "모두 찾기"(클릭 판정),
+  출제 범위(현 다중선택 × 프렛 5/12/22), localStorage 누적 통계(정답률·평균 응답).
+- 이명동음 결정 확정: 퀴즈 보캐뷸러리는 canonical 12명(KEYS) — 키 컨텍스트가 없는
+  퀴즈에서 pc당 이름 하나로 모호성 제거. E#/Cb류는 퀴즈에 등장하지 않음.
+- 최종 리뷰가 Critical 1건 발견·수정: 모두 찾기가 pitch class로만 판정해 범위 밖
+  같은 음 클릭으로도 라운드가 완료되던 결함(계획 스펙 자체 모순) → 타깃 위치 집합
+  판정 + 클릭 타겟 범위 제한(`Fretboard.interactivePositions`)으로 수정, 회귀 테스트 3건.
+
+### M3 → M4 이관 (최종 리뷰 triage)
+- **동작 개선**: 라운드 완료 기록을 이펙트 기반으로(함수형 setState와 함께 — 프로그래매틱
+  배칭 클릭 시 스테일 클로저 관측됨, 실사용은 미발생) / 범위 변경 시 진행 중 라운드 리셋
+  또는 startFind 시점 범위 스냅샷 / stats setItem try/catch
+- **UX/폴리시**: 퀴즈 범위의 보드 시각 표시, 클릭 타겟 키보드 접근성 + svg role 재검토,
+  세션 카운터 모드별 분리, 미답 문제 스킵 정책 결정, select id/name, .quiz 데드 클래스
+- **코드 위생**: handlePositionClick 인라인 타입 → FretPos 재사용, CHORD_IDS-CHORDS
+  완전성 테스트(dim 코드 추가 대비), engine fretMax<0 경계 테스트
+- **M4 설계 노트**: 퀴즈 설정(range/quizMode)을 URL 상태로 올리려면 Quiz 내부 상태를
+  page ViewState로 리프트 — 현 캡슐화 구조상 기계적 변경
+
+### M2 → M3 이관 (2026-07-16 최종 리뷰 결과 — 전부 M3 Task 1에서 완료)
 - **M3 첫 커밋에 일괄 (원라이너 배치)**:
   - `CHORD_IDS` 순서 버그: `Object.keys`가 숫자형 키 "7"을 앞으로 정렬 → 명시적 리터럴 배열로 교체 (드롭다운 순서 maj/m/7/maj7/m7 복원)
   - 모드 탭 no-op 클릭 가드: 활성 탭 재클릭 시 박스 필터가 리셋되는 문제 → `mode !== id` 가드
