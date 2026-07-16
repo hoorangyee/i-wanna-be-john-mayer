@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { render, fireEvent } from "@testing-library/react";
 import { Fretboard, type QuizMark } from "./Fretboard";
 import { scaleNoteMap } from "@/theory/scales";
-import { chordNoteMap } from "@/theory/chords";
+import { chordToneMap } from "@/theory/chords";
 
 describe("Fretboard", () => {
   const notes = scaleNoteMap("A", "minorPentatonic");
@@ -55,7 +55,7 @@ describe("Fretboard", () => {
 });
 
 describe("Fretboard colorMode=degree", () => {
-  const chordNotes = chordNoteMap("E", "7"); // E G# B D
+  const chordNotes = chordToneMap("E", "dominant", ["7"]); // E G# B D
 
   const fillOf = (container: HTMLElement, testid: string) =>
     container.querySelector(`[data-testid='${testid}'] circle`)?.getAttribute("fill");
@@ -80,7 +80,7 @@ describe("Fretboard colorMode=degree", () => {
 
 describe("Fretboard overlay", () => {
   const scale = scaleNoteMap("A", "minorPentatonic"); // A C D E G
-  const chord = chordNoteMap("A", "7");               // A C# E G
+  const chord = chordToneMap("A", "dominant", ["7"]); // A C# E G
 
   it("dims scale-only notes and colors chord tones by degree", () => {
     const { container } = render(
@@ -106,7 +106,7 @@ describe("Fretboard overlay", () => {
   });
 
   it("rings only the chord root, not the background scale root", () => {
-    const e7 = chordNoteMap("E", "7"); // E G# B D — A는 스케일 전용이 됨
+    const e7 = chordToneMap("E", "dominant", ["7"]); // E G# B D — A는 스케일 전용이 됨
     const { container } = render(
       <Fretboard notes={scale} labelMode="name" window={null} overlay={e7} />
     );
