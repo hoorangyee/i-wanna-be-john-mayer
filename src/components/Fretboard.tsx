@@ -20,6 +20,7 @@ export interface FretboardProps {
   interactive?: boolean;
   interactivePositions?: ReadonlySet<string>;
   onPositionClick?: (pos: FretPos) => void;
+  onNoteClick?: (pos: FretPos) => void;
   marks?: ReadonlyMap<string, QuizMark>;
   activeRegion?: { strings: readonly StringNo[]; fretMax: number } | null;
   overlay?: Map<PitchClass, NoteInfo>;
@@ -54,7 +55,7 @@ const fretX = (fret: number) => NUT_X + fret * FRET_W;          // 프렛선 x
 const noteX = (fret: number) =>
   fret === 0 ? OPEN_X : NUT_X + (fret - 0.5) * FRET_W;          // 노트 중심 x
 
-export function Fretboard({ notes, labelMode, window = null, colorMode = "root", interactive = false, interactivePositions, onPositionClick, marks, activeRegion = null, overlay }: FretboardProps) {
+export function Fretboard({ notes, labelMode, window = null, colorMode = "root", interactive = false, interactivePositions, onPositionClick, onNoteClick, marks, activeRegion = null, overlay }: FretboardProps) {
   const midY = (stringY(3) + stringY(4)) / 2;
 
   return (
@@ -133,6 +134,7 @@ export function Fretboard({ notes, labelMode, window = null, colorMode = "root",
                data-root={info.isRoot ? "true" : "false"}
                data-dimmed={dimmed ? "true" : "false"}
                {...(overlay ? { "data-layer": isOverlayNote ? "overlay" : "scale" } : {})}
+               {...(onNoteClick ? { onClick: () => onNoteClick({ str, fret }), style: { cursor: "pointer" } as const } : {})}
                opacity={dimmed ? 0.18 : overlay && !isOverlayNote ? 0.45 : 1}>
               <circle cx={noteX(fret)} cy={stringY(str)} r={12}
                       fill={fill}

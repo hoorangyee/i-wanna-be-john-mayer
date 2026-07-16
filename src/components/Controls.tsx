@@ -2,6 +2,7 @@ import { KEYS, type Key } from "@/theory/notes";
 import { SCALES, SCALE_IDS, type ScaleId } from "@/theory/scales";
 import { CHORDS, CHORD_IDS, type ChordId } from "@/theory/chords";
 import type { LabelMode } from "./Fretboard";
+import { SoundToggle } from "./SoundToggle";
 
 export type Mode = "scale" | "chord" | "overlay" | "quiz";
 
@@ -110,6 +111,7 @@ export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, 
           )}
         </>
       )}
+      <SoundToggle />
     </div>
   );
 }

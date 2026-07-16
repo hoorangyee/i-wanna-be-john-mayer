@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { STRINGS, posKey, type StringNo, type FretPos } from "@/theory/fretboard";
+import { playPosition } from "@/audio/tone";
 import {
   DEFAULT_RANGE, makeFindAllTarget, makeNameQuestion, positionsInRange,
   type FindAllTarget, type NameQuestion, type QuizRange,
@@ -122,6 +123,7 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
 
   const handlePositionClick = (pos: FretPos) => {
     if (!target || roundOver) return;
+    playPosition(pos);
     const k = posKey(pos);
     if (found.has(k) || misses.has(k)) return;
     if (targetKeys!.has(k)) {

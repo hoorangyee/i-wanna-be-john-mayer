@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { scaleNoteMap, SCALES } from "@/theory/scales";
 import { chordNoteMap, CHORDS } from "@/theory/chords";
 import { boxesFor } from "@/theory/boxes";
+import { playPosition } from "@/audio/tone";
 import { Fretboard } from "@/components/Fretboard";
 import { Controls } from "@/components/Controls";
 import { Quiz } from "@/components/Quiz";
@@ -77,6 +78,7 @@ export default function Home() {
             window={activeWindow}
             colorMode={isChord ? "degree" : "root"}
             overlay={overlayNotes}
+            onNoteClick={playPosition}
           />
         </section>
       )}

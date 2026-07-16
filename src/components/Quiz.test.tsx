@@ -1,6 +1,9 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { render, fireEvent, cleanup } from "@testing-library/react";
+import { playPosition } from "@/audio/tone";
 import { Quiz } from "./Quiz";
+
+vi.mock("@/audio/tone", () => ({ playPosition: vi.fn() }));
 
 afterEach(() => {
   cleanup();
@@ -115,6 +118,12 @@ describe("Quiz — 모두 찾기", () => {
     const { container } = setup();
     expect(container.querySelector("[data-testid='hit-6-5']")).not.toBeNull();
     expect(container.querySelector("[data-testid='hit-4-2']")).toBeNull(); // 4번줄은 기본 범위 밖
+  });
+
+  it("plays the clicked position's tone", () => {
+    const { container } = setup();
+    fireEvent.click(container.querySelector("[data-testid='hit-6-5']")!);
+    expect(playPosition).toHaveBeenCalledWith({ str: 6, fret: 5 });
   });
 
   it("resets an active round when the range changes", () => {

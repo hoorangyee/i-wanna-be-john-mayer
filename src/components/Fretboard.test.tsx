@@ -207,4 +207,14 @@ describe("Fretboard quiz interaction", () => {
     expect(container.querySelector("[data-testid='region-fret-cover']")).toBeNull();
     expect(container.querySelector("[data-testid^='region-string-cover']")).toBeNull();
   });
+
+  it("reports note clicks when onNoteClick is provided", () => {
+    const onClick = vi.fn();
+    const { container } = render(
+      <Fretboard notes={scaleNoteMap("A", "minorPentatonic")} labelMode="name" window={null}
+                 onNoteClick={onClick} />
+    );
+    fireEvent.click(container.querySelector("[data-testid='note-6-5']")!);
+    expect(onClick).toHaveBeenCalledWith({ str: 6, fret: 5 });
+  });
 });
