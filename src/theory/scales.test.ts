@@ -44,4 +44,14 @@ describe("scaleNoteMap", () => {
     expect(map.get(10)).toEqual({ name: "A#", degree: "b5", isRoot: false });
     expect(map.size).toBe(6);
   });
+
+  it("G minor pentatonic spells Bb (not A#) via relative-major preference", () => {
+    const map = scaleNoteMap("G", "minorPentatonic");
+    expect(map.get(10)!.name).toBe("Bb");
+  });
+
+  it("E blues keeps sharp spelling (relative major G is sharp)", () => {
+    const map = scaleNoteMap("E", "blues");
+    expect(map.get(10)!.name).toBe("A#");
+  });
 });

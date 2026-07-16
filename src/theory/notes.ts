@@ -1,4 +1,6 @@
 export type PitchClass = number; // 0=C .. 11=B
+export type Accidental = "flat" | "sharp";
+export type ToneFamily = "major" | "minor";
 
 export const KEYS = [
   "C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B",
@@ -14,7 +16,21 @@ export function keyToPc(key: Key): PitchClass {
   return KEYS.indexOf(key);
 }
 
-export function spell(pc: PitchClass, key: Key): string {
-  const names = FLAT_KEYS.has(key) ? NAMES_FLAT : NAMES_SHARP;
+export function preference(key: Key, family: ToneFamily): Accidental {
+  if (family === "minor") {
+    if (key.includes("b")) return "flat";
+    if (key.includes("#")) return "sharp";
+    const relativeMajor = KEYS[(keyToPc(key) + 3) % 12];
+    return FLAT_KEYS.has(relativeMajor) ? "flat" : "sharp";
+  }
+  return FLAT_KEYS.has(key) ? "flat" : "sharp";
+}
+
+export function spellWith(pc: PitchClass, acc: Accidental): string {
+  const names = acc === "flat" ? NAMES_FLAT : NAMES_SHARP;
   return names[((pc % 12) + 12) % 12];
+}
+
+export function spell(pc: PitchClass, key: Key): string {
+  return spellWith(pc, preference(key, "major"));
 }

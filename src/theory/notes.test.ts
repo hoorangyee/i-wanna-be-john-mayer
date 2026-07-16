@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { KEYS, keyToPc, spell } from "./notes";
+import { KEYS, keyToPc, spell, preference, spellWith } from "./notes";
 
 describe("keyToPc", () => {
   it("maps canonical keys to pitch classes", () => {
@@ -32,5 +32,34 @@ describe("spell", () => {
   it("naturals are identical in both preferences", () => {
     expect(spell(0, "F")).toBe("C");
     expect(spell(0, "G")).toBe("C");
+  });
+});
+
+describe("preference", () => {
+  it("major family follows the existing flat-key set", () => {
+    expect(preference("F", "major")).toBe("flat");
+    expect(preference("G", "major")).toBe("sharp");
+  });
+
+  it("minor family: explicit accidental in key name wins", () => {
+    expect(preference("Eb", "minor")).toBe("flat");
+    expect(preference("F#", "minor")).toBe("sharp");
+  });
+
+  it("minor family: natural keys inherit relative major preference", () => {
+    expect(preference("G", "minor")).toBe("flat");  // 나란한조 Bb
+    expect(preference("D", "minor")).toBe("flat");  // 나란한조 F
+    expect(preference("E", "minor")).toBe("sharp"); // 나란한조 G
+    expect(preference("A", "minor")).toBe("sharp"); // 나란한조 C
+    expect(preference("B", "minor")).toBe("sharp"); // 나란한조 D
+  });
+});
+
+describe("spellWith", () => {
+  it("spells by explicit accidental, normalizing out-of-range pc", () => {
+    expect(spellWith(10, "flat")).toBe("Bb");
+    expect(spellWith(10, "sharp")).toBe("A#");
+    expect(spellWith(-2, "flat")).toBe("Bb");
+    expect(spellWith(13, "sharp")).toBe("C#");
   });
 });
