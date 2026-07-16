@@ -18,6 +18,7 @@ export interface FretboardProps {
   window?: FretWindow | null;
   colorMode?: "root" | "degree";
   interactive?: boolean;
+  interactivePositions?: ReadonlySet<string>;
   onPositionClick?: (pos: FretPos) => void;
   marks?: ReadonlyMap<string, QuizMark>;
 }
@@ -51,7 +52,7 @@ const fretX = (fret: number) => NUT_X + fret * FRET_W;          // 프렛선 x
 const noteX = (fret: number) =>
   fret === 0 ? OPEN_X : NUT_X + (fret - 0.5) * FRET_W;          // 노트 중심 x
 
-export function Fretboard({ notes, labelMode, window = null, colorMode = "root", interactive = false, onPositionClick, marks }: FretboardProps) {
+export function Fretboard({ notes, labelMode, window = null, colorMode = "root", interactive = false, interactivePositions, onPositionClick, marks }: FretboardProps) {
   const midY = (stringY(3) + stringY(4)) / 2;
 
   return (
@@ -141,12 +142,15 @@ export function Fretboard({ notes, labelMode, window = null, colorMode = "root",
 
       {/* 클릭 타겟 */}
       {interactive && STRINGS.flatMap((str) =>
-        Array.from({ length: FRET_COUNT + 1 }, (_, fret) => (
-          <circle key={`hit-${str}-${fret}`} data-testid={`hit-${str}-${fret}`}
-                  cx={noteX(fret)} cy={stringY(str)} r={13}
-                  fill="transparent" style={{ cursor: "pointer" }}
-                  onClick={() => onPositionClick?.({ str, fret })} />
-        ))
+        Array.from({ length: FRET_COUNT + 1 }, (_, fret) => {
+          if (interactivePositions && !interactivePositions.has(posKey({ str, fret }))) return null;
+          return (
+            <circle key={`hit-${str}-${fret}`} data-testid={`hit-${str}-${fret}`}
+                    cx={noteX(fret)} cy={stringY(str)} r={13}
+                    fill="transparent" style={{ cursor: "pointer" }}
+                    onClick={() => onPositionClick?.({ str, fret })} />
+          );
+        })
       )}
     </svg>
   );

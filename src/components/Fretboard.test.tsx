@@ -115,4 +115,13 @@ describe("Fretboard quiz interaction", () => {
     );
     expect(container.querySelector("[data-testid^='hit-']")).toBeNull();
   });
+
+  it("limits click targets to interactivePositions when provided", () => {
+    const { container } = render(
+      <Fretboard notes={empty} labelMode="none" window={null} interactive
+                 interactivePositions={new Set(["6-5"])} onPositionClick={vi.fn()} />
+    );
+    expect(container.querySelector("[data-testid='hit-6-5']")).not.toBeNull();
+    expect(container.querySelector("[data-testid='hit-5-3']")).toBeNull();
+  });
 });

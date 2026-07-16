@@ -102,4 +102,18 @@ describe("Quiz — 모두 찾기", () => {
     const raw = window.localStorage.getItem("fretboard-quiz-stats-v1");
     expect(JSON.parse(raw!).findAll).toEqual(expect.objectContaining({ attempts: 1, correct: 0 }));
   });
+
+  it("judges by target positions, not pitch class alone", () => {
+    const { container } = setup();
+    // 5번줄 12프렛도 같은 A(pc 9)지만 스텁 타깃 목록에 없음 → wrong 처리
+    fireEvent.click(container.querySelector("[data-testid='hit-5-12']")!);
+    expect(container.querySelector("[data-testid='mark-5-12']")?.getAttribute("data-kind")).toBe("wrong");
+    expect(container.querySelector(".view-title")?.textContent).toContain("(0/2)");
+  });
+
+  it("renders click targets only inside the quiz range", () => {
+    const { container } = setup();
+    expect(container.querySelector("[data-testid='hit-6-5']")).not.toBeNull();
+    expect(container.querySelector("[data-testid='hit-4-2']")).toBeNull(); // 4번줄은 기본 범위 밖
+  });
 });

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { STRINGS, pitchAt, posKey, type StringNo } from "@/theory/fretboard";
+import { STRINGS, posKey, type StringNo } from "@/theory/fretboard";
 import {
-  DEFAULT_RANGE, makeFindAllTarget, makeNameQuestion,
+  DEFAULT_RANGE, makeFindAllTarget, makeNameQuestion, positionsInRange,
   type FindAllTarget, type NameQuestion, type QuizRange,
 } from "@/quiz/engine";
 import { accuracy, avgMs, emptyStats, loadStats, recordResult, type QuizModeId, type QuizStats } from "@/quiz/stats";
@@ -72,6 +72,11 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
   const roundComplete = target !== null && found.size === target.positions.length;
   const roundOver = revealed || roundComplete;
 
+  const targetKeys = target ? new Set(target.positions.map(posKey)) : null;
+  const rangeKeys = quizMode === "findAll" && target
+    ? new Set(positionsInRange(range).map(posKey))
+    : undefined;
+
   const startFind = () => {
     setTarget(makeTarget(range));
     setFound(new Set());
@@ -84,7 +89,7 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
     if (!target || roundOver) return;
     const k = posKey(pos);
     if (found.has(k) || misses.has(k)) return;
-    if (pitchAt(pos) === target.pc) {
+    if (targetKeys!.has(k)) {
       const next = new Set(found);
       next.add(k);
       setFound(next);
@@ -174,6 +179,7 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
 
       <Fretboard notes={EMPTY_NOTES} labelMode="none" window={null} marks={marks}
                  interactive={quizMode === "findAll" && target !== null && !roundOver}
+                 interactivePositions={rangeKeys}
                  onPositionClick={handlePositionClick} />
 
       {quizMode === "nameThatNote" && question && (
