@@ -16,6 +16,10 @@ describe("CHORDS", () => {
     expect(CHORDS.m.symbol).toBe("m");
     expect(CHORDS.maj7.symbol).toBe("maj7");
   });
+
+  it("CHORD_IDS preserves declaration order (maj first)", () => {
+    expect(CHORD_IDS).toEqual(["maj", "m", "7", "maj7", "m7"]);
+  });
 });
 
 describe("chordNoteMap", () => {

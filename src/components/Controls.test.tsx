@@ -31,6 +31,13 @@ describe("Controls (scale mode)", () => {
     fireEvent.change(getByLabelText("스케일"), { target: { value: "major" } });
     expect(onChange).toHaveBeenCalledWith({ scaleId: "major", boxIndex: null });
   });
+
+  it("clicking the already-active mode tab does not fire onChange", () => {
+    const onChange = vi.fn();
+    const { getByRole } = render(<Controls {...baseProps} onChange={onChange} />);
+    fireEvent.click(getByRole("button", { name: "스케일" }));
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });
 
 describe("Controls (chord mode)", () => {

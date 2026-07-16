@@ -23,6 +23,8 @@ const FRET_W = (W - NUT_X - RIGHT_PAD) / FRET_COUNT;
 const SINGLE_INLAYS = [3, 5, 7, 9, 15, 17, 19, 21];
 const FRET_NUMBERS = [...SINGLE_INLAYS, 12].sort((a, b) => a - b);
 
+// 주의: degreeFill이 'b'를 일괄 제거하므로 b5도 5와 같은 색이 된다.
+// 현 코드 보캐뷸러리(maj/m/7/maj7/m7)에는 b5가 없지만 dim 계열 추가 시 재검토할 것.
 const TONE_FILL: Record<string, string> = {
   "1": "var(--note-root)",
   "3": "var(--tone-3)",

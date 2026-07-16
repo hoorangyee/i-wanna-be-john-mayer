@@ -33,7 +33,7 @@ export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, 
       <div className="seg" role="group" aria-label="모드">
         {MODES.map(({ id, label }) => (
           <button key={id} data-active={mode === id} aria-pressed={mode === id}
-                  onClick={() => onChange({ mode: id, boxIndex: null })}>
+                  onClick={() => mode !== id && onChange({ mode: id, boxIndex: null })}>
             {label}
           </button>
         ))}

@@ -54,4 +54,11 @@ describe("scaleNoteMap", () => {
     const map = scaleNoteMap("E", "blues");
     expect(map.get(10)!.name).toBe("A#");
   });
+
+  it("C natural minor spells Eb Ab Bb with flats", () => {
+    const map = scaleNoteMap("C", "naturalMinor");
+    expect(map.get(3)!.name).toBe("Eb");
+    expect(map.get(8)!.name).toBe("Ab");
+    expect(map.get(10)!.name).toBe("Bb");
+  });
 });

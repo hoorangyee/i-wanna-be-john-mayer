@@ -53,6 +53,11 @@ describe("preference", () => {
     expect(preference("A", "minor")).toBe("sharp"); // 나란한조 C
     expect(preference("B", "minor")).toBe("sharp"); // 나란한조 D
   });
+
+  it("C and F minor inherit flat relative majors (Eb, Ab)", () => {
+    expect(preference("C", "minor")).toBe("flat");
+    expect(preference("F", "minor")).toBe("flat");
+  });
 });
 
 describe("spellWith", () => {

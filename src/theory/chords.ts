@@ -16,8 +16,8 @@ export const CHORDS = {
   m7: { name: "마이너 7", symbol: "m7", family: "minor", intervals: [0, 3, 7, 10] },
 } as const satisfies Record<string, ChordDef>;
 
-export type ChordId = keyof typeof CHORDS;
-export const CHORD_IDS = Object.keys(CHORDS) as readonly ChordId[];
+export const CHORD_IDS = ["maj", "m", "7", "maj7", "m7"] as const satisfies readonly (keyof typeof CHORDS)[];
+export type ChordId = (typeof CHORD_IDS)[number];
 
 export function chordNoteMap(key: Key, chordId: ChordId): Map<PitchClass, NoteInfo> {
   const root = keyToPc(key);
