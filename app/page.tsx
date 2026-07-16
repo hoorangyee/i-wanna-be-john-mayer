@@ -107,10 +107,8 @@ export default function Home() {
             </div>
             <section className="card">
               <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line px-5 py-3.5">
-                <div className="flex flex-col gap-2.5">
-                  <h2 className="text-[17px] font-semibold tracking-tight">{title}</h2>
-                  <Legend mode={legendMode} />
-                </div>
+                <h2 className="text-[17px] font-semibold tracking-tight">{title}</h2>
+                <Legend mode={legendMode} />
               </div>
               <div className="board-scroll px-5 py-4">
                 <Fretboard
