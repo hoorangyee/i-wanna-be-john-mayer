@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { FRET_COUNT, STRINGS, TUNING, pitchAt } from "./fretboard";
+import { FRET_COUNT, STRINGS, TUNING, pitchAt, posKey } from "./fretboard";
 
 describe("fretboard", () => {
   it("standard tuning open strings", () => {
@@ -26,5 +26,10 @@ describe("fretboard", () => {
   it("constants", () => {
     expect(FRET_COUNT).toBe(22);
     expect(STRINGS).toEqual([1, 2, 3, 4, 5, 6]);
+  });
+
+  it("posKey formats string-fret", () => {
+    expect(posKey({ str: 6, fret: 5 })).toBe("6-5");
+    expect(posKey({ str: 1, fret: 0 })).toBe("1-0");
   });
 });

@@ -21,3 +21,7 @@ export const TUNING: Record<StringNo, PitchClass> = {
 export function pitchAt(pos: FretPos): PitchClass {
   return (TUNING[pos.str] + pos.fret) % 12;
 }
+
+export function posKey(pos: FretPos): string {
+  return `${pos.str}-${pos.fret}`;
+}
