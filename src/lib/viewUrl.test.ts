@@ -29,6 +29,10 @@ describe("viewQueryString", () => {
     expect(viewQueryString({ ...D, mode: "chord", chordId: "maj7" }, D)).toBe("?mode=chord&chord=maj7");
     expect(viewQueryString({ ...D, chordId: "maj7" }, D)).toBe(""); // scale 모드에선 chord 생략
   });
+
+  it("encodes only mode for quiz view", () => {
+    expect(viewQueryString({ ...D, mode: "quiz", keySel: "Bb", labelMode: "degree" }, D)).toBe("?mode=quiz");
+  });
 });
 
 describe("parseViewQuery", () => {

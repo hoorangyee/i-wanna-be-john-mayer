@@ -38,10 +38,10 @@ export function parseViewQuery(search: string, defaults: UrlViewState): UrlViewS
 export function viewQueryString(view: UrlViewState, defaults: UrlViewState): string {
   const p = new URLSearchParams();
   if (view.mode !== defaults.mode) p.set("mode", view.mode);
-  if (view.keySel !== defaults.keySel) p.set("key", view.keySel);
+  if (view.mode !== "quiz" && view.keySel !== defaults.keySel) p.set("key", view.keySel);
   if (view.mode === "scale" && view.scaleId !== defaults.scaleId) p.set("scale", view.scaleId);
   if (view.mode === "chord" && view.chordId !== defaults.chordId) p.set("chord", view.chordId);
-  if (view.labelMode !== defaults.labelMode) p.set("label", view.labelMode);
+  if (view.mode !== "quiz" && view.labelMode !== defaults.labelMode) p.set("label", view.labelMode);
   if (view.mode === "scale" && view.boxIndex !== null) p.set("box", String(view.boxIndex + 1));
   const s = p.toString();
   return s ? `?${s}` : "";

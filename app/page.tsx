@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Key } from "@/theory/notes";
-import { scaleNoteMap, SCALES, type ScaleId } from "@/theory/scales";
-import { chordNoteMap, CHORDS, type ChordId } from "@/theory/chords";
+import { scaleNoteMap, SCALES } from "@/theory/scales";
+import { chordNoteMap, CHORDS } from "@/theory/chords";
 import { boxesFor } from "@/theory/boxes";
-import { Fretboard, type LabelMode } from "@/components/Fretboard";
-import { Controls, type Mode } from "@/components/Controls";
+import { Fretboard } from "@/components/Fretboard";
+import { Controls } from "@/components/Controls";
 import { Quiz } from "@/components/Quiz";
 import { parseViewQuery, viewQueryString, type UrlViewState } from "@/lib/viewUrl";
 
