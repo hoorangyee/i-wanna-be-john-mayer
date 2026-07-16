@@ -34,17 +34,23 @@ const LABEL_MODES: { id: LabelMode; label: string }[] = [
 export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, boxCount, overlayRoot, onChange }: ControlsProps) {
   return (
     <div className="controls">
-      <div className="seg" role="group" aria-label="모드">
-        {MODES.map(({ id, label }) => (
-          <button key={id} data-active={mode === id} aria-pressed={mode === id}
-                  onClick={() => mode !== id && onChange({ mode: id, boxIndex: null })}>
-            {label}
-          </button>
-        ))}
+      {/* 1단: 모드 전환과 무관하게 높이가 고정되는 줄 — 모드 전환 시 레이아웃 점프 방지 */}
+      <div className="controls-top">
+        <div className="seg" role="group" aria-label="모드">
+          {MODES.map(({ id, label }) => (
+            <button key={id} data-active={mode === id} aria-pressed={mode === id}
+                    onClick={() => mode !== id && onChange({ mode: id, boxIndex: null })}>
+              {label}
+            </button>
+          ))}
+        </div>
+        <SoundToggle />
       </div>
 
-      {mode !== "quiz" && (
-        <>
+      {/* 2단: 모드별 컨트롤 — min-height로 내용이 바뀌어도 줄 높이 유지 */}
+      <div className="mode-controls">
+        {mode !== "quiz" && (
+          <>
           <label>
             {mode === "chord" ? "루트" : "키"}
             <select id="view-key" value={keySel} onChange={(e) => onChange({ keySel: e.target.value as Key })}>
@@ -109,9 +115,9 @@ export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, 
               ))}
             </div>
           )}
-        </>
-      )}
-      <SoundToggle />
+          </>
+        )}
+      </div>
     </div>
   );
 }

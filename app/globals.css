@@ -32,12 +32,19 @@ body {
 main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
 
 .topbar {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px;
+  display: flex; flex-wrap: wrap; align-items: flex-start; gap: 16px 28px;
   padding-bottom: 16px; border-bottom: 1px solid var(--line); margin-bottom: 24px;
 }
+.topbar h1 { padding-top: 4px; }
 .topbar h1 { font-size: 20px; letter-spacing: -0.01em; }
 
-.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.controls { display: flex; flex-direction: column; gap: 10px; flex: 1; min-width: 0; }
+.controls-top {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
+  justify-content: space-between;
+}
+/* min-height: 모드 전환으로 내용이 바뀌거나 비어도(퀴즈) 줄 높이를 유지해 지판이 점프하지 않게 */
+.mode-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; min-height: 36px; }
 .controls label { display: flex; align-items: center; gap: 8px; font-size: 14px; }
 .controls select, .quiz-settings select {
   font-size: 15px; padding: 6px 10px; border: 1px solid var(--line);
