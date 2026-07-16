@@ -1,20 +1,33 @@
 import { useEffect, useState } from "react";
-import { STRINGS, posKey, type StringNo } from "@/theory/fretboard";
-import { DEFAULT_RANGE, makeNameQuestion, type NameQuestion, type QuizRange } from "@/quiz/engine";
-import { accuracy, avgMs, emptyStats, loadStats, recordResult, type QuizStats } from "@/quiz/stats";
+import { STRINGS, pitchAt, posKey, type StringNo } from "@/theory/fretboard";
+import {
+  DEFAULT_RANGE, makeFindAllTarget, makeNameQuestion,
+  type FindAllTarget, type NameQuestion, type QuizRange,
+} from "@/quiz/engine";
+import { accuracy, avgMs, emptyStats, loadStats, recordResult, type QuizModeId, type QuizStats } from "@/quiz/stats";
 import { Fretboard, type QuizMark } from "./Fretboard";
 
 export interface QuizProps {
-  makeQuestion?: typeof makeNameQuestion; // 테스트 주입용
+  makeQuestion?: typeof makeNameQuestion;
+  makeTarget?: typeof makeFindAllTarget;
 }
 
 const FRET_MAX_OPTIONS = [5, 12, 22];
 const EMPTY_NOTES = new Map();
+const QUIZ_MODES: { id: QuizModeId; label: string }[] = [
+  { id: "nameThatNote", label: "이 음은?" },
+  { id: "findAll", label: "모두 찾기" },
+];
 
-export function Quiz({ makeQuestion = makeNameQuestion }: QuizProps) {
+export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAllTarget }: QuizProps) {
   const [range, setRange] = useState<QuizRange>(DEFAULT_RANGE);
+  const [quizMode, setQuizMode] = useState<QuizModeId>("nameThatNote");
   const [question, setQuestion] = useState<NameQuestion | null>(null);
   const [picked, setPicked] = useState<string | null>(null);
+  const [target, setTarget] = useState<FindAllTarget | null>(null);
+  const [found, setFound] = useState<ReadonlySet<string>>(new Set());
+  const [misses, setMisses] = useState<ReadonlySet<string>>(new Set());
+  const [revealed, setRevealed] = useState(false);
   const [askedAt, setAskedAt] = useState(0);
   const [session, setSession] = useState({ asked: 0, correct: 0 });
   const [stats, setStats] = useState<QuizStats>(emptyStats());
@@ -45,8 +58,55 @@ export function Quiz({ makeQuestion = makeNameQuestion }: QuizProps) {
     setStats(recordResult("nameThatNote", correct, Date.now() - askedAt));
   };
 
+  const switchQuizMode = (id: QuizModeId) => {
+    if (id === quizMode) return;
+    setQuizMode(id);
+    setQuestion(null);
+    setPicked(null);
+    setTarget(null);
+    setFound(new Set());
+    setMisses(new Set());
+    setRevealed(false);
+  };
+
+  const roundComplete = target !== null && found.size === target.positions.length;
+  const roundOver = revealed || roundComplete;
+
+  const startFind = () => {
+    setTarget(makeTarget(range));
+    setFound(new Set());
+    setMisses(new Set());
+    setRevealed(false);
+    setAskedAt(Date.now());
+  };
+
+  const handlePositionClick = (pos: { str: StringNo; fret: number }) => {
+    if (!target || roundOver) return;
+    const k = posKey(pos);
+    if (found.has(k) || misses.has(k)) return;
+    if (pitchAt(pos) === target.pc) {
+      const next = new Set(found);
+      next.add(k);
+      setFound(next);
+      if (next.size === target.positions.length) {
+        const clean = misses.size === 0;
+        setSession((s) => ({ asked: s.asked + 1, correct: s.correct + (clean ? 1 : 0) }));
+        setStats(recordResult("findAll", clean, Date.now() - askedAt));
+      }
+    } else {
+      setMisses(new Set(misses).add(k));
+    }
+  };
+
+  const giveUp = () => {
+    if (!target || roundOver) return;
+    setRevealed(true);
+    setSession((s) => ({ asked: s.asked + 1, correct: s.correct }));
+    setStats(recordResult("findAll", false, Date.now() - askedAt));
+  };
+
   const marks = new Map<string, QuizMark>();
-  if (question) {
+  if (quizMode === "nameThatNote" && question) {
     marks.set(
       posKey(question.pos),
       picked === null
@@ -54,8 +114,18 @@ export function Quiz({ makeQuestion = makeNameQuestion }: QuizProps) {
         : { kind: picked === question.answer ? "correct" : "wrong", label: question.answer }
     );
   }
+  if (quizMode === "findAll" && target) {
+    for (const k of found) marks.set(k, { kind: "correct", label: target.name });
+    for (const k of misses) marks.set(k, { kind: "wrong" });
+    if (revealed) {
+      for (const p of target.positions) {
+        const k = posKey(p);
+        if (!found.has(k)) marks.set(k, { kind: "reveal", label: target.name });
+      }
+    }
+  }
 
-  const m = stats.nameThatNote;
+  const m = stats[quizMode];
   const acc = accuracy(m);
   const avg = avgMs(m);
 
@@ -71,6 +141,14 @@ export function Quiz({ makeQuestion = makeNameQuestion }: QuizProps) {
             </button>
           ))}
         </div>
+        <div className="seg" role="group" aria-label="퀴즈 종류">
+          {QUIZ_MODES.map(({ id, label }) => (
+            <button key={id} data-active={quizMode === id} aria-pressed={quizMode === id}
+                    onClick={() => switchQuizMode(id)}>
+              {label}
+            </button>
+          ))}
+        </div>
         <label>
           프렛 범위
           <select value={range.fretMax}
@@ -78,16 +156,27 @@ export function Quiz({ makeQuestion = makeNameQuestion }: QuizProps) {
             {FRET_MAX_OPTIONS.map((f) => <option key={f} value={f}>0~{f}</option>)}
           </select>
         </label>
-        <button className="primary" onClick={ask}>
-          {question ? "다음 문제" : "시작"}
+        <button className="primary" onClick={quizMode === "nameThatNote" ? ask : startFind}>
+          {(quizMode === "nameThatNote" ? question : target) ? "다음 문제" : "시작"}
         </button>
+        {quizMode === "findAll" && target && !roundOver && (
+          <button onClick={giveUp}>정답 보기</button>
+        )}
       </div>
 
-      <h2 className="view-title">{question ? "이 위치의 음이름은?" : "퀴즈 — 이 음은?"}</h2>
+      <h2 className="view-title">
+        {quizMode === "nameThatNote"
+          ? question ? "이 위치의 음이름은?" : "퀴즈 — 이 음은?"
+          : target
+            ? `지판에서 모든 ${target.name}을 클릭하세요 (${found.size}/${target.positions.length})`
+            : "퀴즈 — 모두 찾기"}
+      </h2>
 
-      <Fretboard notes={EMPTY_NOTES} labelMode="none" window={null} marks={marks} />
+      <Fretboard notes={EMPTY_NOTES} labelMode="none" window={null} marks={marks}
+                 interactive={quizMode === "findAll" && target !== null && !roundOver}
+                 onPositionClick={handlePositionClick} />
 
-      {question && (
+      {quizMode === "nameThatNote" && question && (
         <div className="quiz-answers">
           {question.choices.map((c) => (
             <button key={c} className="choice"
@@ -100,9 +189,15 @@ export function Quiz({ makeQuestion = makeNameQuestion }: QuizProps) {
         </div>
       )}
 
-      {picked !== null && question && (
+      {quizMode === "nameThatNote" && picked !== null && question && (
         <p className="quiz-feedback" data-correct={picked === question.answer}>
           {picked === question.answer ? "정답!" : `오답 — 정답은 ${question.answer}`}
+        </p>
+      )}
+
+      {quizMode === "findAll" && target && roundOver && (
+        <p className="quiz-feedback" data-correct={roundComplete && misses.size === 0}>
+          {revealed ? "정답 공개" : misses.size === 0 ? "완벽!" : `완료 — 실수 ${misses.size}회`}
         </p>
       )}
 
