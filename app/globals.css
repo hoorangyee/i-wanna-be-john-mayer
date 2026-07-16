@@ -16,6 +16,10 @@
   --tone-3: #3d8b6b;
   --tone-5: #5f7fae;
   --tone-7: #8a63b3;
+  --mark-question: #e0a83c;
+  --mark-correct: #3d8b6b;
+  --mark-wrong: #c05252;
+  --mark-reveal: #9aa0ab;
 }
 
 body {
@@ -34,7 +38,7 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
 
 .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
 .controls label { display: flex; align-items: center; gap: 8px; font-size: 14px; }
-.controls select {
+.controls select, .quiz-settings select {
   font-size: 15px; padding: 6px 10px; border: 1px solid var(--line);
   border-radius: 8px; background: var(--panel); color: inherit;
 }
@@ -53,6 +57,25 @@ main { max-width: 1280px; margin: 0 auto; padding: 20px 24px 48px; }
 .fretboard { width: 100%; height: auto; display: block; }
 .fretboard .note-label { font-size: 11px; font-weight: 700; fill: #fff; }
 .fretboard .fret-no { font-size: 12px; fill: #9a948a; }
+
+.quiz-settings { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-bottom: 16px; }
+.quiz-settings label { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+button.primary {
+  background: var(--accent); color: #fff; border: none; border-radius: 8px;
+  padding: 8px 18px; font-size: 15px; cursor: pointer;
+}
+.quiz-answers { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+.choice {
+  font-size: 18px; min-width: 64px; padding: 10px 22px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--panel); cursor: pointer;
+}
+.choice[data-state="correct"] { background: var(--mark-correct); color: #fff; border-color: transparent; }
+.choice[data-state="wrong"] { background: var(--mark-wrong); color: #fff; border-color: transparent; }
+.choice:disabled { cursor: default; }
+.quiz-feedback { margin-top: 12px; font-weight: 600; }
+.quiz-feedback[data-correct="true"] { color: var(--mark-correct); }
+.quiz-feedback[data-correct="false"] { color: var(--mark-wrong); }
+.quiz-stats { margin-top: 8px; font-size: 14px; color: #7a756c; }
 
 @media (max-width: 720px) {
   main { padding: 12px; }

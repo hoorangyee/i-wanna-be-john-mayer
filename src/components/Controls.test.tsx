@@ -63,3 +63,16 @@ describe("Controls (chord mode)", () => {
     expect(onChange).toHaveBeenCalledWith({ mode: "chord", boxIndex: null });
   });
 });
+
+describe("Controls (quiz mode)", () => {
+  it("shows only the mode tabs in quiz mode", () => {
+    const { queryByLabelText, queryByRole, getByRole } = render(
+      <Controls {...baseProps} mode="quiz" />
+    );
+    expect(getByRole("button", { name: "퀴즈" }).getAttribute("aria-pressed")).toBe("true");
+    expect(queryByLabelText("키")).toBeNull();
+    expect(queryByLabelText("스케일")).toBeNull();
+    expect(queryByRole("group", { name: "라벨 표시" })).toBeNull();
+    expect(queryByRole("group", { name: "포지션" })).toBeNull();
+  });
+});

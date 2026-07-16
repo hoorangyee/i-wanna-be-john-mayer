@@ -3,7 +3,7 @@ import { SCALES, SCALE_IDS, type ScaleId } from "@/theory/scales";
 import { CHORDS, CHORD_IDS, type ChordId } from "@/theory/chords";
 import type { LabelMode } from "./Fretboard";
 
-export type Mode = "scale" | "chord";
+export type Mode = "scale" | "chord" | "quiz";
 
 export interface ControlsProps {
   mode: Mode;
@@ -19,6 +19,7 @@ export interface ControlsProps {
 const MODES: { id: Mode; label: string }[] = [
   { id: "scale", label: "스케일" },
   { id: "chord", label: "코드톤" },
+  { id: "quiz", label: "퀴즈" },
 ];
 
 const LABEL_MODES: { id: LabelMode; label: string }[] = [
@@ -39,55 +40,59 @@ export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, 
         ))}
       </div>
 
-      <label>
-        {mode === "chord" ? "루트" : "키"}
-        <select value={keySel} onChange={(e) => onChange({ keySel: e.target.value as Key })}>
-          {KEYS.map((k) => <option key={k} value={k}>{k}</option>)}
-        </select>
-      </label>
+      {mode !== "quiz" && (
+        <>
+          <label>
+            {mode === "chord" ? "루트" : "키"}
+            <select value={keySel} onChange={(e) => onChange({ keySel: e.target.value as Key })}>
+              {KEYS.map((k) => <option key={k} value={k}>{k}</option>)}
+            </select>
+          </label>
 
-      {mode === "scale" ? (
-        <label>
-          스케일
-          <select value={scaleId}
-                  onChange={(e) => onChange({ scaleId: e.target.value as ScaleId, boxIndex: null })}>
-            {SCALE_IDS.map((id) => <option key={id} value={id}>{SCALES[id].name}</option>)}
-          </select>
-        </label>
-      ) : (
-        <label>
-          코드
-          <select value={chordId}
-                  onChange={(e) => onChange({ chordId: e.target.value as ChordId })}>
-            {CHORD_IDS.map((id) => (
-              <option key={id} value={id}>{keySel}{CHORDS[id].symbol} · {CHORDS[id].name}</option>
+          {mode === "scale" ? (
+            <label>
+              스케일
+              <select value={scaleId}
+                      onChange={(e) => onChange({ scaleId: e.target.value as ScaleId, boxIndex: null })}>
+                {SCALE_IDS.map((id) => <option key={id} value={id}>{SCALES[id].name}</option>)}
+              </select>
+            </label>
+          ) : (
+            <label>
+              코드
+              <select value={chordId}
+                      onChange={(e) => onChange({ chordId: e.target.value as ChordId })}>
+                {CHORD_IDS.map((id) => (
+                  <option key={id} value={id}>{keySel}{CHORDS[id].symbol} · {CHORDS[id].name}</option>
+                ))}
+              </select>
+            </label>
+          )}
+
+          <div className="seg" role="group" aria-label="라벨 표시">
+            {LABEL_MODES.map(({ id, label }) => (
+              <button key={id} data-active={labelMode === id} aria-pressed={labelMode === id}
+                      onClick={() => onChange({ labelMode: id })}>
+                {label}
+              </button>
             ))}
-          </select>
-        </label>
-      )}
+          </div>
 
-      <div className="seg" role="group" aria-label="라벨 표시">
-        {LABEL_MODES.map(({ id, label }) => (
-          <button key={id} data-active={labelMode === id} aria-pressed={labelMode === id}
-                  onClick={() => onChange({ labelMode: id })}>
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {mode === "scale" && boxCount !== null && (
-        <div className="seg" role="group" aria-label="포지션">
-          <button data-active={boxIndex === null} aria-pressed={boxIndex === null}
-                  onClick={() => onChange({ boxIndex: null })}>
-            전체
-          </button>
-          {Array.from({ length: boxCount }, (_, i) => (
-            <button key={i} data-active={boxIndex === i} aria-pressed={boxIndex === i}
-                    onClick={() => onChange({ boxIndex: i })}>
-              {i + 1}
-            </button>
-          ))}
-        </div>
+          {mode === "scale" && boxCount !== null && (
+            <div className="seg" role="group" aria-label="포지션">
+              <button data-active={boxIndex === null} aria-pressed={boxIndex === null}
+                      onClick={() => onChange({ boxIndex: null })}>
+                전체
+              </button>
+              {Array.from({ length: boxCount }, (_, i) => (
+                <button key={i} data-active={boxIndex === i} aria-pressed={boxIndex === i}
+                        onClick={() => onChange({ boxIndex: i })}>
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

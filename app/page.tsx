@@ -7,6 +7,7 @@ import { chordNoteMap, CHORDS, type ChordId } from "@/theory/chords";
 import { boxesFor } from "@/theory/boxes";
 import { Fretboard, type LabelMode } from "@/components/Fretboard";
 import { Controls, type Mode } from "@/components/Controls";
+import { Quiz } from "@/components/Quiz";
 
 interface ViewState {
   mode: Mode;
@@ -28,6 +29,7 @@ export default function Home() {
   });
 
   const isChord = view.mode === "chord";
+  const isQuiz = view.mode === "quiz";
   const notes = isChord
     ? chordNoteMap(view.keySel, view.chordId)
     : scaleNoteMap(view.keySel, view.scaleId);
@@ -53,15 +55,19 @@ export default function Home() {
           onChange={(patch) => setView((v) => ({ ...v, ...patch }))}
         />
       </header>
-      <section className="board">
-        <h2 className="view-title">{title}</h2>
-        <Fretboard
-          notes={notes}
-          labelMode={view.labelMode}
-          window={activeWindow}
-          colorMode={isChord ? "degree" : "root"}
-        />
-      </section>
+      {isQuiz ? (
+        <Quiz />
+      ) : (
+        <section className="board">
+          <h2 className="view-title">{title}</h2>
+          <Fretboard
+            notes={notes}
+            labelMode={view.labelMode}
+            window={activeWindow}
+            colorMode={isChord ? "degree" : "root"}
+          />
+        </section>
+      )}
     </main>
   );
 }
