@@ -3,7 +3,7 @@ import { SCALES, SCALE_IDS, type ScaleId } from "@/theory/scales";
 import { CHORDS, CHORD_IDS, type ChordId } from "@/theory/chords";
 import type { LabelMode } from "./Fretboard";
 
-export type Mode = "scale" | "chord" | "quiz";
+export type Mode = "scale" | "chord" | "overlay" | "quiz";
 
 export interface ControlsProps {
   mode: Mode;
@@ -13,12 +13,14 @@ export interface ControlsProps {
   labelMode: LabelMode;
   boxIndex: number | null;
   boxCount: number | null;   // null = 이 스케일은 박스 미지원 (코드 모드에서도 null 전달)
+  overlayRoot: Key;
   onChange: (patch: Partial<Omit<ControlsProps, "onChange" | "boxCount">>) => void;
 }
 
 const MODES: { id: Mode; label: string }[] = [
   { id: "scale", label: "스케일" },
   { id: "chord", label: "코드톤" },
+  { id: "overlay", label: "오버레이" },
   { id: "quiz", label: "퀴즈" },
 ];
 
@@ -28,7 +30,7 @@ const LABEL_MODES: { id: LabelMode; label: string }[] = [
   { id: "none", label: "숨김" },
 ];
 
-export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, boxCount, onChange }: ControlsProps) {
+export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, boxCount, overlayRoot, onChange }: ControlsProps) {
   return (
     <div className="controls">
       <div className="seg" role="group" aria-label="모드">
@@ -49,7 +51,7 @@ export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, 
             </select>
           </label>
 
-          {mode === "scale" ? (
+          {(mode === "scale" || mode === "overlay") && (
             <label>
               스케일
               <select id="view-scale" value={scaleId}
@@ -57,13 +59,27 @@ export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, 
                 {SCALE_IDS.map((id) => <option key={id} value={id}>{SCALES[id].name}</option>)}
               </select>
             </label>
-          ) : (
+          )}
+
+          {mode === "overlay" && (
+            <label>
+              코드 루트
+              <select id="view-chord-root" value={overlayRoot}
+                      onChange={(e) => onChange({ overlayRoot: e.target.value as Key })}>
+                {KEYS.map((k) => <option key={k} value={k}>{k}</option>)}
+              </select>
+            </label>
+          )}
+
+          {(mode === "chord" || mode === "overlay") && (
             <label>
               코드
               <select id="view-chord" value={chordId}
                       onChange={(e) => onChange({ chordId: e.target.value as ChordId })}>
                 {CHORD_IDS.map((id) => (
-                  <option key={id} value={id}>{keySel}{CHORDS[id].symbol} · {CHORDS[id].name}</option>
+                  <option key={id} value={id}>
+                    {(mode === "chord" ? keySel : overlayRoot)}{CHORDS[id].symbol} · {CHORDS[id].name}
+                  </option>
                 ))}
               </select>
             </label>

@@ -8,6 +8,7 @@ const D: UrlViewState = {
   chordId: "7",
   labelMode: "name",
   boxIndex: null,
+  overlayRoot: "A",
 };
 
 describe("viewQueryString", () => {
@@ -33,6 +34,11 @@ describe("viewQueryString", () => {
   it("encodes only mode for quiz view", () => {
     expect(viewQueryString({ ...D, mode: "quiz", keySel: "Bb", labelMode: "degree" }, D)).toBe("?mode=quiz");
   });
+
+  it("encodes overlay mode with scale, chord root and chord", () => {
+    expect(viewQueryString({ ...D, mode: "overlay", scaleId: "blues", overlayRoot: "E" }, D))
+      .toBe("?mode=overlay&scale=blues&croot=E");
+  });
 });
 
 describe("parseViewQuery", () => {
@@ -53,5 +59,10 @@ describe("parseViewQuery", () => {
 
   it("restores quiz mode from the URL", () => {
     expect(parseViewQuery("?mode=quiz", D).mode).toBe("quiz");
+  });
+
+  it("round-trips an overlay view", () => {
+    const v: UrlViewState = { ...D, mode: "overlay", overlayRoot: "Bb", chordId: "m7" };
+    expect(parseViewQuery(viewQueryString(v, D), D)).toEqual(v);
   });
 });

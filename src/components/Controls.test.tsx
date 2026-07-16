@@ -14,6 +14,7 @@ const baseProps = {
   labelMode: "name" as const,
   boxIndex: null,
   boxCount: 5,
+  overlayRoot: "A" as const,
   onChange: vi.fn(),
 };
 
@@ -74,5 +75,23 @@ describe("Controls (quiz mode)", () => {
     expect(queryByLabelText("스케일")).toBeNull();
     expect(queryByRole("group", { name: "라벨 표시" })).toBeNull();
     expect(queryByRole("group", { name: "포지션" })).toBeNull();
+  });
+});
+
+describe("Controls (overlay mode)", () => {
+  const overlayProps = { ...baseProps, mode: "overlay" as const, overlayRoot: "E" as const };
+
+  it("shows scale, chord-root and chord selects and hides the box filter", () => {
+    const { getByLabelText, queryByRole } = render(<Controls {...overlayProps} />);
+    expect(getByLabelText("키")).not.toBeNull();
+    expect(getByLabelText("스케일")).not.toBeNull();
+    expect(getByLabelText("코드 루트")).not.toBeNull();
+    expect(getByLabelText("코드")).not.toBeNull();
+    expect(queryByRole("group", { name: "포지션" })).toBeNull();
+  });
+
+  it("chord option text uses the overlay chord root", () => {
+    const { getByRole } = render(<Controls {...overlayProps} />);
+    expect(getByRole("option", { name: "E7 · 도미넌트 7" })).not.toBeNull();
   });
 });

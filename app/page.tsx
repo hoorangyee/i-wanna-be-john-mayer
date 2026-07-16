@@ -16,6 +16,7 @@ const DEFAULT_VIEW: UrlViewState = {
   chordId: "7",
   labelMode: "name",
   boxIndex: null,
+  overlayRoot: "A",
 };
 
 export default function Home() {
@@ -33,16 +34,21 @@ export default function Home() {
   }, [view]);
 
   const isChord = view.mode === "chord";
+  const isOverlay = view.mode === "overlay";
   const isQuiz = view.mode === "quiz";
+
   const notes = isChord
     ? chordNoteMap(view.keySel, view.chordId)
     : scaleNoteMap(view.keySel, view.scaleId);
-  const boxes = isChord ? null : boxesFor(view.keySel, view.scaleId);
+  const overlayNotes = isOverlay ? chordNoteMap(view.overlayRoot, view.chordId) : undefined;
+  const boxes = view.mode === "scale" ? boxesFor(view.keySel, view.scaleId) : null;
   const activeWindow = view.boxIndex !== null && boxes ? boxes[view.boxIndex] : null;
 
   const title = isChord
     ? `${view.keySel}${CHORDS[view.chordId].symbol} — ${CHORDS[view.chordId].name} 코드톤`
-    : `${view.keySel} ${SCALES[view.scaleId].name}${view.boxIndex !== null ? ` — 박스 ${view.boxIndex + 1}` : ""}`;
+    : isOverlay
+      ? `${view.keySel} ${SCALES[view.scaleId].name} + ${view.overlayRoot}${CHORDS[view.chordId].symbol} 코드톤`
+      : `${view.keySel} ${SCALES[view.scaleId].name}${view.boxIndex !== null ? ` — 박스 ${view.boxIndex + 1}` : ""}`;
 
   return (
     <main>
@@ -56,6 +62,7 @@ export default function Home() {
           labelMode={view.labelMode}
           boxIndex={view.boxIndex}
           boxCount={boxes ? boxes.length : null}
+          overlayRoot={view.overlayRoot}
           onChange={(patch) => setView((v) => ({ ...v, ...patch }))}
         />
       </header>
@@ -69,6 +76,7 @@ export default function Home() {
             labelMode={view.labelMode}
             window={activeWindow}
             colorMode={isChord ? "degree" : "root"}
+            overlay={overlayNotes}
           />
         </section>
       )}
