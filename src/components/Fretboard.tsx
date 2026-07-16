@@ -20,6 +20,7 @@ const TOP_Y = 28;
 const STRING_GAP = 34;
 const FRET_W = (W - NUT_X - RIGHT_PAD) / FRET_COUNT;
 const SINGLE_INLAYS = [3, 5, 7, 9, 15, 17, 19, 21];
+const FRET_NUMBERS = [...SINGLE_INLAYS, 12].sort((a, b) => a - b);
 
 const stringY = (str: StringNo) => TOP_Y + (str - 1) * STRING_GAP;
 const fretX = (fret: number) => NUT_X + fret * FRET_W;          // 프렛선 x
@@ -55,7 +56,7 @@ export function Fretboard({ notes, labelMode, window = null }: FretboardProps) {
       ))}
 
       {/* 프렛 번호 */}
-      {[3, 5, 7, 9, 12, 15, 17, 19, 21].map((f) => (
+      {FRET_NUMBERS.map((f) => (
         <text key={f} x={noteX(f)} y={H - 8} textAnchor="middle" className="fret-no">
           {f}
         </text>

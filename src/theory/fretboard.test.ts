@@ -20,6 +20,7 @@ describe("fretboard", () => {
     expect(pitchAt({ str: 6, fret: 5 })).toBe(9);  // E현 5프렛 = A
     expect(pitchAt({ str: 6, fret: 12 })).toBe(4); // 12프렛 = 옥타브
     expect(pitchAt({ str: 2, fret: 1 })).toBe(0);  // B현 1프렛 = C
+    expect(pitchAt({ str: 1, fret: 22 })).toBe(2); // 1번 줄 22프렛 = D
   });
 
   it("constants", () => {

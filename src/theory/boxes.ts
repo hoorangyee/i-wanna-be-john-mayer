@@ -31,6 +31,8 @@ export function boxesFor(key: Key, scaleId: ScaleId): FretWindow[] | null {
   const rotated = anchorFrets.map((f) => (f < rootFret ? f + 12 : f));
   rotated.sort((a, b) => a - b);
 
+  // 주의: 22프렛 초과 박스는 12프렛 아래로 시프트되므로
+  // 반환 배열의 start가 오름차순이라는 보장이 없다 (예: D 키 박스 5).
   return rotated.map((anchor) => {
     const start =
       anchor + BOX_SPAN > FRET_COUNT && anchor - 12 >= 0
