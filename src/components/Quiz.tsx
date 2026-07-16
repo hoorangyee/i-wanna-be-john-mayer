@@ -65,6 +65,7 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
     resetProgress();
   };
 
+  // 의도적 결정: 미답 상태에서 "다음 문제"로 넘어가는 스킵을 허용하고 기록하지 않는다.
   const ask = () => {
     setQuestion(makeQuestion(range));
     setPicked(null);
