@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { isSoundEnabled, setSoundEnabled } from "@/audio/tone";
+import { MESSAGES } from "@/lib/i18n";
+import { useLang } from "@/lib/LangContext";
 
 function VolumeOnIcon() {
   return (
@@ -23,6 +25,8 @@ function VolumeOffIcon() {
 }
 
 export function SoundToggle() {
+  const { lang } = useLang();
+  const m = MESSAGES[lang];
   const [on, setOn] = useState(true);
 
   useEffect(() => {
@@ -34,7 +38,7 @@ export function SoundToggle() {
     setOn(!on);
   };
 
-  const label = on ? "소리 켬" : "소리 끔";
+  const label = on ? m.soundOn : m.soundOff;
 
   return (
     <button type="button" className="icon-btn" aria-pressed={on} aria-label={label} title={label}

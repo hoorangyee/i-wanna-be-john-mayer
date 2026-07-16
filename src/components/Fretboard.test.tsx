@@ -164,7 +164,7 @@ describe("Fretboard quiz interaction", () => {
     const hit = container.querySelector("[data-testid='hit-6-5']")!;
     expect(hit.getAttribute("role")).toBe("button");
     expect(hit.getAttribute("tabindex")).toBe("0");
-    expect(hit.getAttribute("aria-label")).toBe("6번 줄 5프렛");
+    expect(hit.getAttribute("aria-label")).toBe("String 6, fret 5");
     fireEvent.keyDown(hit, { key: "Enter" });
     expect(onClick).toHaveBeenCalledWith({ str: 6, fret: 5 });
   });

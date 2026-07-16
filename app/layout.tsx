@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Fretboard — i wanna be john mayer",
-  description: "기타 지판 스케일/코드톤 시각화 학습 도구",
+  description: "Guitar fretboard trainer — scales, chord tones, quizzes",
 };
 
 // 페인트 전에 저장된 테마 선호를 해석해 <html data-theme>을 설정 (FOUC 방지).
@@ -17,7 +17,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT }} />
       </head>

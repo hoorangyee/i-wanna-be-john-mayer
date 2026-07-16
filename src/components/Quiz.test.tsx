@@ -19,33 +19,33 @@ const stubQuestion = {
 describe("Quiz — 이 음은?", () => {
   it("shows a question mark and four choices after start", () => {
     const { getByRole, container } = render(<Quiz makeQuestion={() => stubQuestion} />);
-    fireEvent.click(getByRole("button", { name: "시작" }));
+    fireEvent.click(getByRole("button", { name: "Start" }));
     expect(container.querySelector("[data-testid='mark-6-5']")?.getAttribute("data-kind")).toBe("question");
     expect(container.querySelectorAll(".choice")).toHaveLength(4);
   });
 
   it("marks a correct answer and counts the session", () => {
     const { getByRole, getByText, container } = render(<Quiz makeQuestion={() => stubQuestion} />);
-    fireEvent.click(getByRole("button", { name: "시작" }));
+    fireEvent.click(getByRole("button", { name: "Start" }));
     fireEvent.click(getByRole("button", { name: "A" }));
     expect(container.querySelector("[data-testid='mark-6-5']")?.getAttribute("data-kind")).toBe("correct");
-    expect(getByText("정답!")).not.toBeNull();
-    expect(getByText(/이번 세션 1\/1/)).not.toBeNull();
+    expect(getByText("Correct!")).not.toBeNull();
+    expect(getByText(/Session 1\/1/)).not.toBeNull();
   });
 
   it("reveals the answer at the position on a wrong pick", () => {
     const { getByRole, getByText, container } = render(<Quiz makeQuestion={() => stubQuestion} />);
-    fireEvent.click(getByRole("button", { name: "시작" }));
+    fireEvent.click(getByRole("button", { name: "Start" }));
     fireEvent.click(getByRole("button", { name: "C" }));
     expect(container.querySelector("[data-testid='mark-6-5']")?.getAttribute("data-kind")).toBe("wrong");
     expect(container.querySelector("[data-testid='mark-6-5'] text")?.textContent).toBe("A");
-    expect(getByText(/오답 — 정답은 A/)).not.toBeNull();
-    expect(getByText(/이번 세션 0\/1/)).not.toBeNull();
+    expect(getByText(/Wrong — it was A/)).not.toBeNull();
+    expect(getByText(/Session 0\/1/)).not.toBeNull();
   });
 
   it("persists stats to localStorage", () => {
     const { getByRole } = render(<Quiz makeQuestion={() => stubQuestion} />);
-    fireEvent.click(getByRole("button", { name: "시작" }));
+    fireEvent.click(getByRole("button", { name: "Start" }));
     fireEvent.click(getByRole("button", { name: "A" }));
     const raw = window.localStorage.getItem("fretboard-quiz-stats-v1");
     expect(JSON.parse(raw!).nameThatNote).toEqual(
@@ -63,14 +63,14 @@ const stubTarget = {
 describe("Quiz — 모두 찾기", () => {
   const setup = () => {
     const utils = render(<Quiz makeTarget={() => stubTarget} />);
-    fireEvent.click(utils.getByRole("button", { name: "모두 찾기" }));
-    fireEvent.click(utils.getByRole("button", { name: "시작" }));
+    fireEvent.click(utils.getByRole("button", { name: "Find All" }));
+    fireEvent.click(utils.getByRole("button", { name: "Start" }));
     return utils;
   };
 
   it("shows the target and progress after start", () => {
     const { getByRole } = setup();
-    expect(getByRole("heading", { name: /모든 A/ })).not.toBeNull();
+    expect(getByRole("heading", { name: /every A/ })).not.toBeNull();
     expect(getByRole("heading", { name: /0\/2/ })).not.toBeNull();
   });
 
@@ -81,7 +81,7 @@ describe("Quiz — 모두 찾기", () => {
     fireEvent.click(container.querySelector("[data-testid='hit-6-3']")!); // G — 오답
     expect(container.querySelector("[data-testid='mark-6-3']")?.getAttribute("data-kind")).toBe("wrong");
     fireEvent.click(container.querySelector("[data-testid='hit-5-0']")!);
-    expect(getByText(/완료 — 실수 1회/)).not.toBeNull();
+    expect(getByText(/Done — 1 misses/)).not.toBeNull();
     const raw = window.localStorage.getItem("fretboard-quiz-stats-v1");
     expect(JSON.parse(raw!).findAll).toEqual(expect.objectContaining({ attempts: 1, correct: 0 }));
   });
@@ -90,7 +90,7 @@ describe("Quiz — 모두 찾기", () => {
     const { getByText, container } = setup();
     fireEvent.click(container.querySelector("[data-testid='hit-6-5']")!);
     fireEvent.click(container.querySelector("[data-testid='hit-5-0']")!);
-    expect(getByText("완벽!")).not.toBeNull();
+    expect(getByText("Perfect!")).not.toBeNull();
     const raw = window.localStorage.getItem("fretboard-quiz-stats-v1");
     expect(JSON.parse(raw!).findAll).toEqual(expect.objectContaining({ attempts: 1, correct: 1 }));
   });
@@ -98,7 +98,7 @@ describe("Quiz — 모두 찾기", () => {
   it("reveals remaining positions on give-up and records a miss", () => {
     const { getByRole, container } = setup();
     fireEvent.click(container.querySelector("[data-testid='hit-6-5']")!);
-    fireEvent.click(getByRole("button", { name: "정답 보기" }));
+    fireEvent.click(getByRole("button", { name: "Show Answers" }));
     const reveal = container.querySelector("[data-testid='mark-5-0']");
     expect(reveal?.getAttribute("data-kind")).toBe("reveal");
     expect(reveal?.querySelector("text")?.textContent).toBe("A");
@@ -130,10 +130,10 @@ describe("Quiz — 모두 찾기", () => {
     const { getByRole, getByLabelText, container } = setup();
     fireEvent.click(container.querySelector("[data-testid='hit-6-5']")!);
     expect(container.querySelector("[data-testid='mark-6-5']")).not.toBeNull();
-    fireEvent.change(getByLabelText("프렛 범위"), { target: { value: "5" } });
+    fireEvent.change(getByLabelText("Fret Range"), { target: { value: "5" } });
     expect(container.querySelector("[data-testid='mark-6-5']")).toBeNull();
-    expect(container.querySelector(".view-title")?.textContent).toBe("퀴즈 — 모두 찾기");
-    expect(getByRole("button", { name: "시작" })).not.toBeNull();
+    expect(container.querySelector(".view-title")?.textContent).toBe("Quiz — Find All");
+    expect(getByRole("button", { name: "Start" })).not.toBeNull();
   });
 
   it("records a completed round exactly once even after further re-renders", () => {
@@ -141,7 +141,7 @@ describe("Quiz — 모두 찾기", () => {
     fireEvent.click(container.querySelector("[data-testid='hit-6-5']")!);
     fireEvent.click(container.querySelector("[data-testid='hit-5-0']")!);
     // 완료 후 추가 상태 변화(현 토글 → 리셋 경로)에도 중복 기록 없어야 함
-    fireEvent.click(getByRole("button", { name: "4번" }));
+    fireEvent.click(getByRole("button", { name: "4" }));
     const raw = window.localStorage.getItem("fretboard-quiz-stats-v1");
     expect(JSON.parse(raw!).findAll.attempts).toBe(1);
   });
@@ -150,7 +150,7 @@ describe("Quiz — 모두 찾기", () => {
     const { getByRole, container } = setup();
     fireEvent.click(container.querySelector("[data-testid='hit-6-5']")!);
     fireEvent.click(container.querySelector("[data-testid='hit-5-0']")!);
-    expect(document.activeElement).toBe(getByRole("button", { name: "다음 문제" }));
+    expect(document.activeElement).toBe(getByRole("button", { name: "Next" }));
   });
 
   it("announces feedback via a status region and offers sr-only instructions", () => {
@@ -158,7 +158,7 @@ describe("Quiz — 모두 찾기", () => {
     expect(container.querySelector(".sr-only")?.textContent).toContain("Enter");
     fireEvent.click(container.querySelector("[data-testid='hit-6-5']")!);
     fireEvent.click(container.querySelector("[data-testid='hit-5-0']")!);
-    expect(getByText("완벽!").getAttribute("role")).toBe("status");
+    expect(getByText("Perfect!").getAttribute("role")).toBe("status");
   });
 });
 
@@ -167,11 +167,11 @@ describe("Quiz — 세션 카운터", () => {
     const { getByRole, getByText } = render(
       <Quiz makeQuestion={() => stubQuestion} makeTarget={() => stubTarget} />
     );
-    fireEvent.click(getByRole("button", { name: "시작" }));
+    fireEvent.click(getByRole("button", { name: "Start" }));
     fireEvent.click(getByRole("button", { name: "A" }));
-    expect(getByText(/이번 세션 1\/1/)).not.toBeNull();
-    fireEvent.click(getByRole("button", { name: "모두 찾기" }));
-    expect(getByText(/이번 세션 0\/0/)).not.toBeNull();
+    expect(getByText(/Session 1\/1/)).not.toBeNull();
+    fireEvent.click(getByRole("button", { name: "Find All" }));
+    expect(getByText(/Session 0\/0/)).not.toBeNull();
   });
 });
 

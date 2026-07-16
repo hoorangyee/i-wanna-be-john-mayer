@@ -2,12 +2,8 @@ import { useEffect, useState } from "react";
 import {
   applyTheme, loadThemePref, nextThemePref, resolveTheme, saveThemePref, type ThemePref,
 } from "@/lib/theme";
-
-const LABELS: Record<ThemePref, string> = {
-  system: "테마: 시스템",
-  light: "테마: 라이트",
-  dark: "테마: 다크",
-};
+import { MESSAGES } from "@/lib/i18n";
+import { useLang } from "@/lib/LangContext";
 
 function SystemIcon() {
   return (
@@ -39,6 +35,13 @@ function MoonIcon() {
 }
 
 export function ThemeToggle() {
+  const { lang } = useLang();
+  const m = MESSAGES[lang];
+  const LABELS: Record<ThemePref, string> = {
+    system: m.themeSystem,
+    light: m.themeLight,
+    dark: m.themeDark,
+  };
   // null = 저장된 선호 로드 전 — 이때는 FOUC 스크립트가 설정한 data-theme을 건드리지 않는다
   const [pref, setPref] = useState<ThemePref | null>(null);
 

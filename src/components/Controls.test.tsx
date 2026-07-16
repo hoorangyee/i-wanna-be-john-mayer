@@ -21,15 +21,15 @@ const baseProps = {
 describe("Controls (scale mode)", () => {
   it("hides the position filter when boxCount is null", () => {
     const { queryByRole, rerender } = render(<Controls {...baseProps} />);
-    expect(queryByRole("group", { name: "포지션" })).not.toBeNull();
+    expect(queryByRole("group", { name: "Position" })).not.toBeNull();
     rerender(<Controls {...baseProps} boxCount={null} />);
-    expect(queryByRole("group", { name: "포지션" })).toBeNull();
+    expect(queryByRole("group", { name: "Position" })).toBeNull();
   });
 
   it("resets boxIndex when the scale changes", () => {
     const onChange = vi.fn();
     const { getByLabelText } = render(<Controls {...baseProps} onChange={onChange} />);
-    fireEvent.change(getByLabelText("스케일"), { target: { value: "major" } });
+    fireEvent.change(getByLabelText("Scale"), { target: { value: "major" } });
     expect(onChange).toHaveBeenCalledWith({ scaleId: "major", boxIndex: null });
   });
 });
@@ -39,15 +39,15 @@ describe("Controls (chord mode)", () => {
 
   it("shows the chord select and hides scale select and position filter", () => {
     const { queryByLabelText, queryByRole, getByLabelText } = render(<Controls {...chordProps} />);
-    expect(getByLabelText("코드")).not.toBeNull();
-    expect(queryByLabelText("스케일")).toBeNull();
-    expect(queryByRole("group", { name: "포지션" })).toBeNull();
+    expect(getByLabelText("Chord")).not.toBeNull();
+    expect(queryByLabelText("Scale")).toBeNull();
+    expect(queryByRole("group", { name: "Position" })).toBeNull();
   });
 
-  it("labels the key select as 루트 and composes chord option text", () => {
+  it("labels the key select as Root and composes chord option text", () => {
     const { getByLabelText, getByRole } = render(<Controls {...chordProps} />);
-    expect(getByLabelText("루트")).not.toBeNull();
-    expect(getByRole("option", { name: "A7 · 도미넌트 7" })).not.toBeNull();
+    expect(getByLabelText("Root")).not.toBeNull();
+    expect(getByRole("option", { name: "A7 · Dominant 7" })).not.toBeNull();
   });
 });
 
@@ -63,15 +63,15 @@ describe("Controls (overlay mode)", () => {
 
   it("shows scale, chord-root and chord selects and hides the box filter", () => {
     const { getByLabelText, queryByRole } = render(<Controls {...overlayProps} />);
-    expect(getByLabelText("키")).not.toBeNull();
-    expect(getByLabelText("스케일")).not.toBeNull();
-    expect(getByLabelText("코드 루트")).not.toBeNull();
-    expect(getByLabelText("코드")).not.toBeNull();
-    expect(queryByRole("group", { name: "포지션" })).toBeNull();
+    expect(getByLabelText("Key")).not.toBeNull();
+    expect(getByLabelText("Scale")).not.toBeNull();
+    expect(getByLabelText("Chord Root")).not.toBeNull();
+    expect(getByLabelText("Chord")).not.toBeNull();
+    expect(queryByRole("group", { name: "Position" })).toBeNull();
   });
 
   it("chord option text uses the overlay chord root", () => {
     const { getByRole } = render(<Controls {...overlayProps} />);
-    expect(getByRole("option", { name: "E7 · 도미넌트 7" })).not.toBeNull();
+    expect(getByRole("option", { name: "E7 · Dominant 7" })).not.toBeNull();
   });
 });

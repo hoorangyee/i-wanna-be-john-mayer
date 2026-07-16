@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { scaleNoteMap, SCALES } from "@/theory/scales";
+import { scaleNoteMap } from "@/theory/scales";
 import { chordNoteMap, CHORDS } from "@/theory/chords";
 import { boxesFor } from "@/theory/boxes";
 import { playPosition } from "@/audio/tone";
@@ -10,9 +10,12 @@ import { Controls } from "@/components/Controls";
 import { ModeTabs } from "@/components/ModeTabs";
 import { SoundToggle } from "@/components/SoundToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LangToggle } from "@/components/LangToggle";
 import { Quiz } from "@/components/Quiz";
 import { Legend } from "@/components/Legend";
 import { parseViewQuery, viewQueryString, type UrlViewState } from "@/lib/viewUrl";
+import { MESSAGES, SCALE_NAMES, CHORD_NAMES } from "@/lib/i18n";
+import { LangProvider, useLang } from "@/lib/LangContext";
 
 const DEFAULT_VIEW: UrlViewState = {
   mode: "scale",
@@ -32,7 +35,9 @@ function PickIcon() {
   );
 }
 
-export default function Home() {
+function HomeInner() {
+  const { lang } = useLang();
+  const m = MESSAGES[lang];
   const [view, setView] = useState<UrlViewState>(DEFAULT_VIEW);
 
   // 마운트 시 URL → 상태 (SSR/하이드레이션 후 1회)
@@ -57,11 +62,13 @@ export default function Home() {
   const boxes = view.mode === "scale" ? boxesFor(view.keySel, view.scaleId) : null;
   const activeWindow = view.boxIndex !== null && boxes ? boxes[view.boxIndex] : null;
 
+  const scaleName = SCALE_NAMES[lang][view.scaleId];
+  const chordName = CHORD_NAMES[lang][view.chordId];
   const title = isChord
-    ? `${view.keySel}${CHORDS[view.chordId].symbol} — ${CHORDS[view.chordId].name} 코드톤`
+    ? m.titleChord(view.keySel, CHORDS[view.chordId].symbol, chordName)
     : isOverlay
-      ? `${view.keySel} ${SCALES[view.scaleId].name} + ${view.overlayRoot}${CHORDS[view.chordId].symbol} 코드톤`
-      : `${view.keySel} ${SCALES[view.scaleId].name}${view.boxIndex !== null ? ` — 박스 ${view.boxIndex + 1}` : ""}`;
+      ? m.titleOverlay(view.keySel, scaleName, view.overlayRoot, CHORDS[view.chordId].symbol)
+      : m.titleScale(view.keySel, scaleName, view.boxIndex);
 
   const legendMode = isChord ? "chord" : isOverlay ? "overlay" : "scale";
 
@@ -73,12 +80,13 @@ export default function Home() {
             <PickIcon />
             Fretboard
           </h1>
-          <nav className="order-last w-full sm:order-none sm:w-auto sm:flex-1" aria-label="모드 전환">
+          <nav className="order-last w-full sm:order-none sm:w-auto sm:flex-1" aria-label={m.modeNav}>
             <div className="flex sm:justify-center">
               <ModeTabs mode={view.mode} onSelect={(patch) => setView((v) => ({ ...v, ...patch }))} />
             </div>
           </nav>
           <div className="ml-auto flex items-center gap-2">
+            <LangToggle />
             <SoundToggle />
             <ThemeToggle />
           </div>
@@ -125,5 +133,13 @@ export default function Home() {
         )}
       </main>
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    <LangProvider>
+      <HomeInner />
+    </LangProvider>
   );
 }

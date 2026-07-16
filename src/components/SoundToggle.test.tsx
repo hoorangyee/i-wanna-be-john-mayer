@@ -10,7 +10,7 @@ afterEach(() => {
 describe("SoundToggle", () => {
   it("toggles the sound preference and its pressed state", () => {
     const { getByRole } = render(<SoundToggle />);
-    const btn = getByRole("button", { name: /소리/ });
+    const btn = getByRole("button", { name: /Sound/ });
     expect(btn.getAttribute("aria-pressed")).toBe("true");
     fireEvent.click(btn);
     expect(btn.getAttribute("aria-pressed")).toBe("false");

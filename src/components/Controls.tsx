@@ -1,6 +1,8 @@
 import { KEYS, type Key } from "@/theory/notes";
-import { SCALES, SCALE_IDS, type ScaleId } from "@/theory/scales";
+import { SCALE_IDS, type ScaleId } from "@/theory/scales";
 import { CHORDS, CHORD_IDS, type ChordId } from "@/theory/chords";
+import { MESSAGES, SCALE_NAMES, CHORD_NAMES } from "@/lib/i18n";
+import { useLang } from "@/lib/LangContext";
 import type { LabelMode } from "./Fretboard";
 
 export type Mode = "scale" | "chord" | "overlay" | "quiz";
@@ -17,19 +19,21 @@ export interface ControlsProps {
   onChange: (patch: Partial<Omit<ControlsProps, "onChange" | "boxCount">>) => void;
 }
 
-const LABEL_MODES: { id: LabelMode; label: string }[] = [
-  { id: "name", label: "음이름" },
-  { id: "degree", label: "도수" },
-  { id: "none", label: "숨김" },
-];
-
 export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, boxCount, overlayRoot, onChange }: ControlsProps) {
+  const { lang } = useLang();
+  const m = MESSAGES[lang];
+  const LABEL_MODES: { id: LabelMode; label: string }[] = [
+    { id: "name", label: m.labelNames },
+    { id: "degree", label: m.labelDegrees },
+    { id: "none", label: m.labelOff },
+  ];
+
   if (mode === "quiz") return null; // 퀴즈 설정은 Quiz가 자체 렌더
 
   return (
     <div className="flex flex-wrap items-end gap-x-5 gap-y-3">
       <label className="field">
-        {mode === "chord" ? "루트" : "키"}
+        {mode === "chord" ? m.root : m.key}
         <select id="view-key" value={keySel} onChange={(e) => onChange({ keySel: e.target.value as Key })}>
           {KEYS.map((k) => <option key={k} value={k}>{k}</option>)}
         </select>
@@ -37,17 +41,17 @@ export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, 
 
       {(mode === "scale" || mode === "overlay") && (
         <label className="field">
-          스케일
+          {m.scale}
           <select id="view-scale" value={scaleId}
                   onChange={(e) => onChange({ scaleId: e.target.value as ScaleId, boxIndex: null })}>
-            {SCALE_IDS.map((id) => <option key={id} value={id}>{SCALES[id].name}</option>)}
+            {SCALE_IDS.map((id) => <option key={id} value={id}>{SCALE_NAMES[lang][id]}</option>)}
           </select>
         </label>
       )}
 
       {mode === "overlay" && (
         <label className="field">
-          코드 루트
+          {m.chordRoot}
           <select id="view-chord-root" value={overlayRoot}
                   onChange={(e) => onChange({ overlayRoot: e.target.value as Key })}>
             {KEYS.map((k) => <option key={k} value={k}>{k}</option>)}
@@ -57,19 +61,19 @@ export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, 
 
       {(mode === "chord" || mode === "overlay") && (
         <label className="field">
-          코드
+          {m.chord}
           <select id="view-chord" value={chordId}
                   onChange={(e) => onChange({ chordId: e.target.value as ChordId })}>
             {CHORD_IDS.map((id) => (
               <option key={id} value={id}>
-                {(mode === "chord" ? keySel : overlayRoot)}{CHORDS[id].symbol} · {CHORDS[id].name}
+                {(mode === "chord" ? keySel : overlayRoot)}{CHORDS[id].symbol} · {CHORD_NAMES[lang][id]}
               </option>
             ))}
           </select>
         </label>
       )}
 
-      <div className="seg" role="group" aria-label="라벨 표시">
+      <div className="seg" role="group" aria-label={m.labelGroup}>
         {LABEL_MODES.map(({ id, label }) => (
           <button key={id} type="button" data-active={labelMode === id} aria-pressed={labelMode === id}
                   onClick={() => onChange({ labelMode: id })}>
@@ -79,10 +83,10 @@ export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, 
       </div>
 
       {mode === "scale" && boxCount !== null && (
-        <div className="seg" role="group" aria-label="포지션">
+        <div className="seg" role="group" aria-label={m.positionGroup}>
           <button type="button" data-active={boxIndex === null} aria-pressed={boxIndex === null}
                   onClick={() => onChange({ boxIndex: null })}>
-            전체
+            {m.positionAll}
           </button>
           {Array.from({ length: boxCount }, (_, i) => (
             <button key={i} type="button" data-active={boxIndex === i} aria-pressed={boxIndex === i}

@@ -2,6 +2,8 @@ import type { PitchClass } from "@/theory/notes";
 import { FRET_COUNT, STRINGS, pitchAt, posKey, type FretPos, type StringNo } from "@/theory/fretboard";
 import type { NoteInfo } from "@/theory/scales";
 import type { FretWindow } from "@/theory/boxes";
+import { MESSAGES } from "@/lib/i18n";
+import { useLang } from "@/lib/LangContext";
 
 export type LabelMode = "name" | "degree" | "none";
 
@@ -56,11 +58,13 @@ const noteX = (fret: number) =>
   fret === 0 ? OPEN_X : NUT_X + (fret - 0.5) * FRET_W;          // 노트 중심 x
 
 export function Fretboard({ notes, labelMode, window = null, colorMode = "root", interactive = false, interactivePositions, onPositionClick, onNoteClick, marks, activeRegion = null, overlay }: FretboardProps) {
+  const { lang } = useLang();
+  const m = MESSAGES[lang];
   const midY = (stringY(3) + stringY(4)) / 2;
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="fretboard" role={interactive ? "group" : "img"}
-         aria-label="기타 지판">
+         aria-label={m.fretboard}>
       {/* 너트 */}
       <rect x={NUT_X - 4} y={TOP_Y} width={4} height={STRING_GAP * 5} fill="var(--fb-nut)" />
 
@@ -183,7 +187,7 @@ export function Fretboard({ notes, labelMode, window = null, colorMode = "root",
                     cx={noteX(fret)} cy={stringY(str)} r={13}
                     fill="transparent" style={{ cursor: "pointer" }}
                     role="button" tabIndex={0}
-                    aria-label={`${str}번 줄 ${fret}프렛`}
+                    aria-label={m.hitLabel(str, fret)}
                     onClick={() => onPositionClick?.({ str, fret })}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" || e.key === " ") {

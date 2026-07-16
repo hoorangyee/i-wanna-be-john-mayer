@@ -22,21 +22,21 @@ afterEach(() => {
 describe("ThemeToggle", () => {
   it("cycles system → light → dark → system", () => {
     const { getByRole } = render(<ThemeToggle />);
-    const btn = getByRole("button", { name: "테마: 시스템" });
+    const btn = getByRole("button", { name: "Theme: System" });
     fireEvent.click(btn);
-    expect(getByRole("button", { name: "테마: 라이트" })).not.toBeNull();
+    expect(getByRole("button", { name: "Theme: Light" })).not.toBeNull();
     fireEvent.click(btn);
-    expect(getByRole("button", { name: "테마: 다크" })).not.toBeNull();
+    expect(getByRole("button", { name: "Theme: Dark" })).not.toBeNull();
     fireEvent.click(btn);
-    expect(getByRole("button", { name: "테마: 시스템" })).not.toBeNull();
+    expect(getByRole("button", { name: "Theme: System" })).not.toBeNull();
   });
 
   it("persists the preference and applies the resolved theme", () => {
     const { getByRole } = render(<ThemeToggle />);
-    fireEvent.click(getByRole("button", { name: "테마: 시스템" })); // → light
+    fireEvent.click(getByRole("button", { name: "Theme: System" })); // → light
     expect(window.localStorage.getItem("fretboard-theme")).toBe("light");
     expect(document.documentElement.dataset.theme).toBe("light");
-    fireEvent.click(getByRole("button", { name: "테마: 라이트" })); // → dark
+    fireEvent.click(getByRole("button", { name: "Theme: Light" })); // → dark
     expect(window.localStorage.getItem("fretboard-theme")).toBe("dark");
     expect(document.documentElement.dataset.theme).toBe("dark");
   });
@@ -52,6 +52,6 @@ describe("ThemeToggle", () => {
     stubMatchMedia(false); // OS 라이트
     const { getByRole } = render(<ThemeToggle />);
     expect(document.documentElement.dataset.theme).toBe("dark");
-    expect(getByRole("button", { name: "테마: 다크" })).not.toBeNull();
+    expect(getByRole("button", { name: "Theme: Dark" })).not.toBeNull();
   });
 });
