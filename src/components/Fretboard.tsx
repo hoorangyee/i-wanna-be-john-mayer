@@ -132,6 +132,7 @@ export function Fretboard({ notes, labelMode, window = null, colorMode = "root",
           const ring = info.isRoot && (!overlay || isOverlayNote);
           return (
             <g key={`${str}-${fret}`}
+               className="note"
                data-testid={`note-${str}-${fret}`}
                data-root={info.isRoot ? "true" : "false"}
                data-dimmed={dimmed ? "true" : "false"}
@@ -160,7 +161,7 @@ export function Fretboard({ notes, labelMode, window = null, colorMode = "root",
           if (!mark) return null;
           const label = mark.label ?? (mark.kind === "question" ? "?" : null);
           return (
-            <g key={`mark-${str}-${fret}`} data-testid={`mark-${str}-${fret}`} data-kind={mark.kind}>
+            <g key={`mark-${str}-${fret}`} className="mark" data-testid={`mark-${str}-${fret}`} data-kind={mark.kind}>
               <circle cx={noteX(fret)} cy={stringY(str)} r={12}
                       fill={`var(--mark-${mark.kind})`} />
               {label && (

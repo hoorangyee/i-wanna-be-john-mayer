@@ -11,6 +11,7 @@ import { ModeTabs } from "@/components/ModeTabs";
 import { SoundToggle } from "@/components/SoundToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Quiz } from "@/components/Quiz";
+import { Legend } from "@/components/Legend";
 import { parseViewQuery, viewQueryString, type UrlViewState } from "@/lib/viewUrl";
 
 const DEFAULT_VIEW: UrlViewState = {
@@ -62,6 +63,8 @@ export default function Home() {
       ? `${view.keySel} ${SCALES[view.scaleId].name} + ${view.overlayRoot}${CHORDS[view.chordId].symbol} 코드톤`
       : `${view.keySel} ${SCALES[view.scaleId].name}${view.boxIndex !== null ? ` — 박스 ${view.boxIndex + 1}` : ""}`;
 
+  const legendMode = isChord ? "chord" : isOverlay ? "overlay" : "scale";
+
   return (
     <>
       <header className="sticky top-0 z-10 border-b border-line bg-[color-mix(in_srgb,var(--surface)_82%,transparent)] backdrop-blur-md">
@@ -104,7 +107,10 @@ export default function Home() {
             </div>
             <section className="card">
               <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line px-5 py-3.5">
-                <h2 className="text-[17px] font-semibold tracking-tight">{title}</h2>
+                <div className="flex flex-col gap-2.5">
+                  <h2 className="text-[17px] font-semibold tracking-tight">{title}</h2>
+                  <Legend mode={legendMode} />
+                </div>
               </div>
               <div className="board-scroll px-5 py-4">
                 <Fretboard
