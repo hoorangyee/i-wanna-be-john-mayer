@@ -9,7 +9,7 @@
   --surface-2: #eef0f4;
   --line: #e2e5ea;
   --ink: #1f2430;
-  --ink-muted: #6b7280;
+  --ink-muted: #616875; /* surface-2 위에서도 WCAG AA(4.9:1) 확보 */
   --accent: #4f46e5;
   --accent-ink: #ffffff;
   --shadow-card: 0 1px 2px rgb(31 36 48 / 0.04), 0 4px 16px rgb(31 36 48 / 0.06);

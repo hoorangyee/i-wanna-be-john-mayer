@@ -14,7 +14,7 @@
 
 ### 라이트 (쿨 뉴트럴)
 - `--bg: #f6f7f9` / `--surface: #ffffff` / `--surface-2: #eef0f4` / `--line: #e2e5ea`
-- `--ink: #1f2430` / `--ink-muted: #6b7280`
+- `--ink: #1f2430` / `--ink-muted: #616875` (최종 리뷰에서 #6b7280이 surface-2 위 4.26:1로 AA 미달로 판정되어 상향)
 - `--accent: #4f46e5`(인디고 600) / `--accent-ink: #ffffff`
 - `--shadow-card: 0 1px 2px rgb(31 36 48 / 0.04), 0 4px 16px rgb(31 36 48 / 0.06)`
 
