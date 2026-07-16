@@ -145,6 +145,21 @@ describe("Quiz — 모두 찾기", () => {
     const raw = window.localStorage.getItem("fretboard-quiz-stats-v1");
     expect(JSON.parse(raw!).findAll.attempts).toBe(1);
   });
+
+  it("moves focus to the next-question button when the round ends", () => {
+    const { getByRole, container } = setup();
+    fireEvent.click(container.querySelector("[data-testid='hit-6-5']")!);
+    fireEvent.click(container.querySelector("[data-testid='hit-5-0']")!);
+    expect(document.activeElement).toBe(getByRole("button", { name: "다음 문제" }));
+  });
+
+  it("announces feedback via a status region and offers sr-only instructions", () => {
+    const { container, getByText } = setup();
+    expect(container.querySelector(".sr-only")?.textContent).toContain("Enter");
+    fireEvent.click(container.querySelector("[data-testid='hit-6-5']")!);
+    fireEvent.click(container.querySelector("[data-testid='hit-5-0']")!);
+    expect(getByText("완벽!").getAttribute("role")).toBe("status");
+  });
 });
 
 describe("Quiz — 세션 카운터", () => {

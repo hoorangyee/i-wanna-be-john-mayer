@@ -36,6 +36,7 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
   });
   const [stats, setStats] = useState<QuizStats>(emptyStats());
   const recordedRef = useRef(false);
+  const primaryBtnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     setStats(loadStats()); // SSR 하이드레이션 불일치 방지: 마운트 후 로드
@@ -106,6 +107,11 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
     }));
     setStats(recordResult("findAll", clean, Date.now() - askedAt));
   }, [target, roundOver, roundComplete, misses, askedAt]);
+
+  const answered = picked !== null;
+  useEffect(() => {
+    if (roundOver || answered) primaryBtnRef.current?.focus();
+  }, [roundOver, answered]);
 
   const targetKeys = target ? new Set(target.positions.map(posKey)) : null;
   const rangeKeys = quizMode === "findAll" && target
@@ -189,7 +195,7 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
             {FRET_MAX_OPTIONS.map((f) => <option key={f} value={f}>0~{f}</option>)}
           </select>
         </label>
-        <button className="primary" onClick={quizMode === "nameThatNote" ? ask : startFind}>
+        <button ref={primaryBtnRef} className="primary" onClick={quizMode === "nameThatNote" ? ask : startFind}>
           {(quizMode === "nameThatNote" ? question : target) ? "다음 문제" : "시작"}
         </button>
         {quizMode === "findAll" && target && !roundOver && (
@@ -204,6 +210,12 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
             ? `지판에서 모든 ${target.name}을 클릭하세요 (${found.size}/${target.positions.length})`
             : "퀴즈 — 모두 찾기"}
       </h2>
+
+      {quizMode === "findAll" && target && !roundOver && (
+        <p className="sr-only">
+          지판의 클릭 영역을 Tab으로 이동하고 Enter로 선택하세요. 목표: 모든 {target.name} 찾기.
+        </p>
+      )}
 
       <Fretboard notes={EMPTY_NOTES} labelMode="none" window={null} marks={marks}
                  interactive={quizMode === "findAll" && target !== null && !roundOver}
@@ -224,13 +236,13 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
       )}
 
       {quizMode === "nameThatNote" && picked !== null && question && (
-        <p className="quiz-feedback" data-correct={picked === question.answer}>
+        <p className="quiz-feedback" role="status" data-correct={picked === question.answer}>
           {picked === question.answer ? "정답!" : `오답 — 정답은 ${question.answer}`}
         </p>
       )}
 
       {quizMode === "findAll" && target && roundOver && (
-        <p className="quiz-feedback" data-correct={roundComplete && misses.size === 0}>
+        <p className="quiz-feedback" role="status" data-correct={roundComplete && misses.size === 0}>
           {revealed ? "정답 공개" : misses.size === 0 ? "완벽!" : `완료 — 실수 ${misses.size}회`}
         </p>
       )}

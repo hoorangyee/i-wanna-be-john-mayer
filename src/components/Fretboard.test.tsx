@@ -194,7 +194,7 @@ describe("Fretboard quiz interaction", () => {
       <Fretboard notes={empty} labelMode="none" window={null}
                  activeRegion={{ strings: [6, 5], fretMax: 12 }} />
     );
-    expect(container.querySelector("[data-testid='region-fret-cover']")).not.toBeNull();
+    expect(container.querySelector("[data-testid='region-fret-cover-6']")).not.toBeNull();
     expect(container.querySelector("[data-testid='region-string-cover-1']")).not.toBeNull();
     expect(container.querySelector("[data-testid='region-string-cover-6']")).toBeNull();
   });
@@ -204,8 +204,18 @@ describe("Fretboard quiz interaction", () => {
       <Fretboard notes={empty} labelMode="none" window={null}
                  activeRegion={{ strings: [1, 2, 3, 4, 5, 6], fretMax: 22 }} />
     );
-    expect(container.querySelector("[data-testid='region-fret-cover']")).toBeNull();
+    expect(container.querySelector("[data-testid^='region-fret-cover']")).toBeNull();
     expect(container.querySelector("[data-testid^='region-string-cover']")).toBeNull();
+  });
+
+  it("covers each out-of-range cell exactly once (no double dim)", () => {
+    const { container } = render(
+      <Fretboard notes={empty} labelMode="none" window={null}
+                 activeRegion={{ strings: [6, 5], fretMax: 12 }} />
+    );
+    // 프렛 덮개는 범위 내 현(6·5번 줄)의 행에만 — 범위 밖 현은 현 덮개 하나로 끝
+    expect(container.querySelector("[data-testid='region-fret-cover-5']")).not.toBeNull();
+    expect(container.querySelector("[data-testid='region-fret-cover-1']")).toBeNull();
   });
 
   it("reports note clicks when onNoteClick is provided", () => {

@@ -93,13 +93,15 @@ export function Fretboard({ notes, labelMode, window = null, colorMode = "root",
       {/* 출제 범위 밖 덮개 */}
       {activeRegion && (
         <g data-testid="active-region" pointerEvents="none">
-          {activeRegion.fretMax < FRET_COUNT && (
-            <rect data-testid="region-fret-cover"
-                  x={fretX(Math.max(activeRegion.fretMax, 0))} y={TOP_Y - 16}
-                  width={W - RIGHT_PAD - fretX(Math.max(activeRegion.fretMax, 0))}
-                  height={STRING_GAP * 5 + 32}
-                  fill="var(--bg)" opacity={0.6} />
-          )}
+          {activeRegion.fretMax < FRET_COUNT &&
+            STRINGS.filter((s) => activeRegion.strings.includes(s)).map((s) => (
+              <rect key={`fret-cover-${s}`} data-testid={`region-fret-cover-${s}`}
+                    x={fretX(Math.max(activeRegion.fretMax, 0))}
+                    y={stringY(s) - STRING_GAP / 2}
+                    width={W - RIGHT_PAD - fretX(Math.max(activeRegion.fretMax, 0))}
+                    height={STRING_GAP}
+                    fill="var(--bg)" opacity={0.6} />
+            ))}
           {STRINGS.filter((s) => !activeRegion.strings.includes(s)).map((s) => (
             <rect key={s} data-testid={`region-string-cover-${s}`}
                   x={OPEN_X - 14} y={stringY(s) - STRING_GAP / 2}
