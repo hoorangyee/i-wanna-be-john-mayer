@@ -64,6 +64,10 @@ button.primary {
   background: var(--accent); color: #fff; border: none; border-radius: 8px;
   padding: 8px 18px; font-size: 15px; cursor: pointer;
 }
+button.secondary {
+  background: var(--panel); color: inherit; border: 1px solid var(--line); border-radius: 8px;
+  padding: 8px 18px; font-size: 15px; cursor: pointer;
+}
 .quiz-answers { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
 .choice {
   font-size: 18px; min-width: 64px; padding: 10px 22px;

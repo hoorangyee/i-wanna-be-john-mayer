@@ -191,7 +191,7 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
           {(quizMode === "nameThatNote" ? question : target) ? "다음 문제" : "시작"}
         </button>
         {quizMode === "findAll" && target && !roundOver && (
-          <button onClick={giveUp}>정답 보기</button>
+          <button className="secondary" onClick={giveUp}>정답 보기</button>
         )}
       </div>
 
