@@ -32,13 +32,6 @@ describe("Controls (scale mode)", () => {
     fireEvent.change(getByLabelText("스케일"), { target: { value: "major" } });
     expect(onChange).toHaveBeenCalledWith({ scaleId: "major", boxIndex: null });
   });
-
-  it("clicking the already-active mode tab does not fire onChange", () => {
-    const onChange = vi.fn();
-    const { getByRole } = render(<Controls {...baseProps} onChange={onChange} />);
-    fireEvent.click(getByRole("button", { name: "스케일" }));
-    expect(onChange).not.toHaveBeenCalled();
-  });
 });
 
 describe("Controls (chord mode)", () => {
@@ -56,25 +49,12 @@ describe("Controls (chord mode)", () => {
     expect(getByLabelText("루트")).not.toBeNull();
     expect(getByRole("option", { name: "A7 · 도미넌트 7" })).not.toBeNull();
   });
-
-  it("switching mode resets boxIndex", () => {
-    const onChange = vi.fn();
-    const { getByRole } = render(<Controls {...baseProps} onChange={onChange} />);
-    fireEvent.click(getByRole("button", { name: "코드톤" }));
-    expect(onChange).toHaveBeenCalledWith({ mode: "chord", boxIndex: null });
-  });
 });
 
 describe("Controls (quiz mode)", () => {
-  it("shows only the mode tabs in quiz mode", () => {
-    const { queryByLabelText, queryByRole, getByRole } = render(
-      <Controls {...baseProps} mode="quiz" />
-    );
-    expect(getByRole("button", { name: "퀴즈" }).getAttribute("aria-pressed")).toBe("true");
-    expect(queryByLabelText("키")).toBeNull();
-    expect(queryByLabelText("스케일")).toBeNull();
-    expect(queryByRole("group", { name: "라벨 표시" })).toBeNull();
-    expect(queryByRole("group", { name: "포지션" })).toBeNull();
+  it("renders nothing in quiz mode (settings live in Quiz)", () => {
+    const { container } = render(<Controls {...baseProps} mode="quiz" />);
+    expect(container.firstChild).toBeNull();
   });
 });
 
