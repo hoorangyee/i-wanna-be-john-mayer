@@ -9,6 +9,7 @@ export interface FretboardProps {
   notes: Map<PitchClass, NoteInfo>;
   labelMode: LabelMode;
   window?: FretWindow | null;
+  colorMode?: "root" | "degree";
 }
 
 const W = 1180;
@@ -22,12 +23,23 @@ const FRET_W = (W - NUT_X - RIGHT_PAD) / FRET_COUNT;
 const SINGLE_INLAYS = [3, 5, 7, 9, 15, 17, 19, 21];
 const FRET_NUMBERS = [...SINGLE_INLAYS, 12].sort((a, b) => a - b);
 
+const TONE_FILL: Record<string, string> = {
+  "1": "var(--note-root)",
+  "3": "var(--tone-3)",
+  "5": "var(--tone-5)",
+  "7": "var(--tone-7)",
+};
+
+function degreeFill(degree: string): string {
+  return TONE_FILL[degree.replace("b", "")] ?? "var(--note-scale)";
+}
+
 const stringY = (str: StringNo) => TOP_Y + (str - 1) * STRING_GAP;
 const fretX = (fret: number) => NUT_X + fret * FRET_W;          // 프렛선 x
 const noteX = (fret: number) =>
   fret === 0 ? OPEN_X : NUT_X + (fret - 0.5) * FRET_W;          // 노트 중심 x
 
-export function Fretboard({ notes, labelMode, window = null }: FretboardProps) {
+export function Fretboard({ notes, labelMode, window = null, colorMode = "root" }: FretboardProps) {
   const midY = (stringY(3) + stringY(4)) / 2;
 
   return (
@@ -77,7 +89,11 @@ export function Fretboard({ notes, labelMode, window = null }: FretboardProps) {
                data-dimmed={dimmed ? "true" : "false"}
                opacity={dimmed ? 0.18 : 1}>
               <circle cx={noteX(fret)} cy={stringY(str)} r={12}
-                      fill={info.isRoot ? "var(--note-root)" : "var(--note-scale)"}
+                      fill={
+                        colorMode === "degree"
+                          ? degreeFill(info.degree)
+                          : info.isRoot ? "var(--note-root)" : "var(--note-scale)"
+                      }
                       stroke={info.isRoot ? "var(--note-root-ring)" : "none"}
                       strokeWidth={info.isRoot ? 3 : 0} />
               {label && (

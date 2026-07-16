@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
 import { Fretboard } from "./Fretboard";
 import { scaleNoteMap } from "@/theory/scales";
+import { chordNoteMap } from "@/theory/chords";
 
 describe("Fretboard", () => {
   const notes = scaleNoteMap("A", "minorPentatonic");
@@ -50,5 +51,29 @@ describe("Fretboard", () => {
     expect(container.querySelector("[data-testid='note-3-9']")?.getAttribute("data-dimmed")).toBe("false");
     // 경계: end+1 프렛(10)의 노트는 디밍됨 (6번 줄 10프렛 = D)
     expect(container.querySelector("[data-testid='note-6-10']")?.getAttribute("data-dimmed")).toBe("true");
+  });
+});
+
+describe("Fretboard colorMode=degree", () => {
+  const chordNotes = chordNoteMap("E", "7"); // E G# B D
+
+  const fillOf = (container: HTMLElement, testid: string) =>
+    container.querySelector(`[data-testid='${testid}'] circle`)?.getAttribute("fill");
+
+  it("colors notes by degree family", () => {
+    const { container } = render(
+      <Fretboard notes={chordNotes} labelMode="degree" window={null} colorMode="degree" />
+    );
+    expect(fillOf(container, "note-6-0")).toBe("var(--note-root)"); // E = 1
+    expect(fillOf(container, "note-6-4")).toBe("var(--tone-3)");    // G# = 3
+    expect(fillOf(container, "note-6-7")).toBe("var(--tone-5)");    // B = 5
+    expect(fillOf(container, "note-6-10")).toBe("var(--tone-7)");   // D = b7
+  });
+
+  it("default colorMode keeps the two-color scheme", () => {
+    const { container } = render(
+      <Fretboard notes={chordNotes} labelMode="degree" window={null} />
+    );
+    expect(fillOf(container, "note-6-4")).toBe("var(--note-scale)");
   });
 });
