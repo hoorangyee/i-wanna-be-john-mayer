@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { render, fireEvent, screen, cleanup } from "@testing-library/react";
+import { render, fireEvent, cleanup } from "@testing-library/react";
 import { Controls } from "./Controls";
 
 afterEach(() => {
@@ -25,8 +25,8 @@ describe("Controls", () => {
 
   it("resets boxIndex when the scale changes", () => {
     const onChange = vi.fn();
-    render(<Controls {...baseProps} onChange={onChange} />);
-    fireEvent.change(screen.getByDisplayValue("마이너 펜타토닉"), { target: { value: "major" } });
+    const { getByLabelText } = render(<Controls {...baseProps} onChange={onChange} />);
+    fireEvent.change(getByLabelText("스케일"), { target: { value: "major" } });
     expect(onChange).toHaveBeenCalledWith({ scaleId: "major", boxIndex: null });
   });
 });
