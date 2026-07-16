@@ -1,6 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { render } from "@testing-library/react";
-import { Fretboard } from "./Fretboard";
+import { describe, it, expect, vi } from "vitest";
+import { render, fireEvent } from "@testing-library/react";
+import { Fretboard, type QuizMark } from "./Fretboard";
 import { scaleNoteMap } from "@/theory/scales";
 import { chordNoteMap } from "@/theory/chords";
 
@@ -75,5 +75,44 @@ describe("Fretboard colorMode=degree", () => {
       <Fretboard notes={chordNotes} labelMode="degree" window={null} />
     );
     expect(fillOf(container, "note-6-4")).toBe("var(--note-scale)");
+  });
+});
+
+describe("Fretboard quiz interaction", () => {
+  const empty = new Map();
+
+  it("renders marks with kind fill and labels", () => {
+    const marks = new Map<string, QuizMark>([
+      ["6-5", { kind: "question" }],
+      ["5-3", { kind: "correct", label: "C" }],
+      ["4-2", { kind: "wrong", label: "E" }],
+    ]);
+    const { container } = render(
+      <Fretboard notes={empty} labelMode="none" window={null} marks={marks} />
+    );
+    const q = container.querySelector("[data-testid='mark-6-5']");
+    expect(q?.getAttribute("data-kind")).toBe("question");
+    expect(q?.querySelector("circle")?.getAttribute("fill")).toBe("var(--mark-question)");
+    expect(q?.querySelector("text")?.textContent).toBe("?");
+    expect(container.querySelector("[data-testid='mark-5-3'] text")?.textContent).toBe("C");
+    expect(container.querySelector("[data-testid='mark-4-2'] circle")?.getAttribute("fill")).toBe("var(--mark-wrong)");
+  });
+
+  it("renders click targets and reports positions when interactive", () => {
+    const onClick = vi.fn();
+    const { container } = render(
+      <Fretboard notes={empty} labelMode="none" window={null} interactive onPositionClick={onClick} />
+    );
+    const hit = container.querySelector("[data-testid='hit-5-3']");
+    expect(hit).not.toBeNull();
+    fireEvent.click(hit!);
+    expect(onClick).toHaveBeenCalledWith({ str: 5, fret: 3 });
+  });
+
+  it("renders no click targets by default", () => {
+    const { container } = render(
+      <Fretboard notes={empty} labelMode="none" window={null} />
+    );
+    expect(container.querySelector("[data-testid^='hit-']")).toBeNull();
   });
 });

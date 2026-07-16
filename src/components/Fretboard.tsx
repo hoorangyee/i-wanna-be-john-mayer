@@ -1,15 +1,25 @@
 import type { PitchClass } from "@/theory/notes";
-import { FRET_COUNT, STRINGS, pitchAt, type StringNo } from "@/theory/fretboard";
+import { FRET_COUNT, STRINGS, pitchAt, posKey, type FretPos, type StringNo } from "@/theory/fretboard";
 import type { NoteInfo } from "@/theory/scales";
 import type { FretWindow } from "@/theory/boxes";
 
 export type LabelMode = "name" | "degree" | "none";
+
+export type QuizMarkKind = "question" | "correct" | "wrong" | "reveal";
+
+export interface QuizMark {
+  kind: QuizMarkKind;
+  label?: string;
+}
 
 export interface FretboardProps {
   notes: Map<PitchClass, NoteInfo>;
   labelMode: LabelMode;
   window?: FretWindow | null;
   colorMode?: "root" | "degree";
+  interactive?: boolean;
+  onPositionClick?: (pos: FretPos) => void;
+  marks?: ReadonlyMap<string, QuizMark>;
 }
 
 const W = 1180;
@@ -41,7 +51,7 @@ const fretX = (fret: number) => NUT_X + fret * FRET_W;          // 프렛선 x
 const noteX = (fret: number) =>
   fret === 0 ? OPEN_X : NUT_X + (fret - 0.5) * FRET_W;          // 노트 중심 x
 
-export function Fretboard({ notes, labelMode, window = null, colorMode = "root" }: FretboardProps) {
+export function Fretboard({ notes, labelMode, window = null, colorMode = "root", interactive = false, onPositionClick, marks }: FretboardProps) {
   const midY = (stringY(3) + stringY(4)) / 2;
 
   return (
@@ -107,6 +117,36 @@ export function Fretboard({ notes, labelMode, window = null, colorMode = "root" 
             </g>
           );
         })
+      )}
+
+      {/* 퀴즈 마크 */}
+      {marks && STRINGS.flatMap((str) =>
+        Array.from({ length: FRET_COUNT + 1 }, (_, fret) => {
+          const mark = marks.get(posKey({ str, fret }));
+          if (!mark) return null;
+          const label = mark.label ?? (mark.kind === "question" ? "?" : null);
+          return (
+            <g key={`mark-${str}-${fret}`} data-testid={`mark-${str}-${fret}`} data-kind={mark.kind}>
+              <circle cx={noteX(fret)} cy={stringY(str)} r={12}
+                      fill={`var(--mark-${mark.kind})`} />
+              {label && (
+                <text x={noteX(fret)} y={stringY(str) + 4} textAnchor="middle" className="note-label">
+                  {label}
+                </text>
+              )}
+            </g>
+          );
+        })
+      )}
+
+      {/* 클릭 타겟 */}
+      {interactive && STRINGS.flatMap((str) =>
+        Array.from({ length: FRET_COUNT + 1 }, (_, fret) => (
+          <circle key={`hit-${str}-${fret}`} data-testid={`hit-${str}-${fret}`}
+                  cx={noteX(fret)} cy={stringY(str)} r={13}
+                  fill="transparent" style={{ cursor: "pointer" }}
+                  onClick={() => onPositionClick?.({ str, fret })} />
+        ))
       )}
     </svg>
   );
