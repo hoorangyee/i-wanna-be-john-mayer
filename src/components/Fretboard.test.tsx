@@ -116,6 +116,30 @@ describe("Fretboard quiz interaction", () => {
     expect(container.querySelector("[data-testid^='hit-']")).toBeNull();
   });
 
+  it("supports keyboard activation of click targets", () => {
+    const onClick = vi.fn();
+    const { container } = render(
+      <Fretboard notes={empty} labelMode="none" window={null} interactive onPositionClick={onClick} />
+    );
+    const hit = container.querySelector("[data-testid='hit-6-5']")!;
+    expect(hit.getAttribute("role")).toBe("button");
+    expect(hit.getAttribute("tabindex")).toBe("0");
+    expect(hit.getAttribute("aria-label")).toBe("6번 줄 5프렛");
+    fireEvent.keyDown(hit, { key: "Enter" });
+    expect(onClick).toHaveBeenCalledWith({ str: 6, fret: 5 });
+  });
+
+  it("switches the svg role when interactive", () => {
+    const { container: plain } = render(
+      <Fretboard notes={empty} labelMode="none" window={null} />
+    );
+    expect(plain.querySelector("svg")?.getAttribute("role")).toBe("img");
+    const { container: inter } = render(
+      <Fretboard notes={empty} labelMode="none" window={null} interactive />
+    );
+    expect(inter.querySelector("svg")?.getAttribute("role")).toBe("group");
+  });
+
   it("limits click targets to interactivePositions when provided", () => {
     const { container } = render(
       <Fretboard notes={empty} labelMode="none" window={null} interactive

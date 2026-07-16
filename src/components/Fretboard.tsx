@@ -57,7 +57,7 @@ export function Fretboard({ notes, labelMode, window = null, colorMode = "root",
   const midY = (stringY(3) + stringY(4)) / 2;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="fretboard" role="img"
+    <svg viewBox={`0 0 ${W} ${H}`} className="fretboard" role={interactive ? "group" : "img"}
          aria-label="기타 지판">
       {/* 너트 */}
       <rect x={NUT_X - 4} y={TOP_Y} width={4} height={STRING_GAP * 5} fill="var(--fb-nut)" />
@@ -168,7 +168,15 @@ export function Fretboard({ notes, labelMode, window = null, colorMode = "root",
             <circle key={`hit-${str}-${fret}`} data-testid={`hit-${str}-${fret}`}
                     cx={noteX(fret)} cy={stringY(str)} r={13}
                     fill="transparent" style={{ cursor: "pointer" }}
-                    onClick={() => onPositionClick?.({ str, fret })} />
+                    role="button" tabIndex={0}
+                    aria-label={`${str}번 줄 ${fret}프렛`}
+                    onClick={() => onPositionClick?.({ str, fret })}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        onPositionClick?.({ str, fret });
+                      }
+                    }} />
           );
         })
       )}
