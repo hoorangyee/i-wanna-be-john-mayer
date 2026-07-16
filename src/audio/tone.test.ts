@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import { STRINGS, pitchAt } from "@/theory/fretboard";
 import {
   midiAt, freqOf, isSoundEnabled, setSoundEnabled, playPosition,
   type AudioContextLike,
@@ -14,6 +15,13 @@ describe("midiAt", () => {
     expect(midiAt({ str: 5, fret: 0 })).toBe(45); // A2
     expect(midiAt({ str: 1, fret: 0 })).toBe(64); // E4
     expect(midiAt({ str: 5, fret: 12 })).toBe(57); // A3 — 옥타브
+  });
+
+  it("stays consistent with the theory tuning table (mod 12)", () => {
+    // OPEN_MIDI(오디오)와 TUNING(이론)은 같은 튜닝의 이중 표현 — 어느 한쪽만 바뀌면 여기서 잡힌다
+    for (const str of STRINGS) {
+      expect(midiAt({ str, fret: 0 }) % 12).toBe(pitchAt({ str, fret: 0 }));
+    }
   });
 });
 
