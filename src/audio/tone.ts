@@ -15,7 +15,11 @@ const PREF_KEY = "fretboard-sound-enabled";
 
 export function isSoundEnabled(): boolean {
   if (typeof window === "undefined") return false;
-  return window.localStorage.getItem(PREF_KEY) !== "off";
+  try {
+    return window.localStorage.getItem(PREF_KEY) !== "off";
+  } catch {
+    return true; // 저장소 접근 불가 시 기본값(켬)으로 동작
+  }
 }
 
 export function setSoundEnabled(on: boolean): void {

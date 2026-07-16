@@ -33,6 +33,15 @@ describe("sound preference", () => {
     setSoundEnabled(true);
     expect(isSoundEnabled()).toBe(true);
   });
+
+  it("survives blocked storage access", () => {
+    const spy = vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+      throw new Error("SecurityError");
+    });
+    expect(isSoundEnabled()).toBe(true);
+    expect(() => playPosition({ str: 6, fret: 0 })).not.toThrow();
+    spy.mockRestore();
+  });
 });
 
 function fakeContext() {
