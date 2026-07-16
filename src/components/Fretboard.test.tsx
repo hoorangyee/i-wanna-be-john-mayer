@@ -124,4 +124,23 @@ describe("Fretboard quiz interaction", () => {
     expect(container.querySelector("[data-testid='hit-6-5']")).not.toBeNull();
     expect(container.querySelector("[data-testid='hit-5-3']")).toBeNull();
   });
+
+  it("dims the board outside the active region", () => {
+    const { container } = render(
+      <Fretboard notes={empty} labelMode="none" window={null}
+                 activeRegion={{ strings: [6, 5], fretMax: 12 }} />
+    );
+    expect(container.querySelector("[data-testid='region-fret-cover']")).not.toBeNull();
+    expect(container.querySelector("[data-testid='region-string-cover-1']")).not.toBeNull();
+    expect(container.querySelector("[data-testid='region-string-cover-6']")).toBeNull();
+  });
+
+  it("renders no overlay when the region covers the whole board", () => {
+    const { container } = render(
+      <Fretboard notes={empty} labelMode="none" window={null}
+                 activeRegion={{ strings: [1, 2, 3, 4, 5, 6], fretMax: 22 }} />
+    );
+    expect(container.querySelector("[data-testid='region-fret-cover']")).toBeNull();
+    expect(container.querySelector("[data-testid^='region-string-cover']")).toBeNull();
+  });
 });

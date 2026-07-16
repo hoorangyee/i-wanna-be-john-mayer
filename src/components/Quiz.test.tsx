@@ -150,3 +150,11 @@ describe("Quiz — 세션 카운터", () => {
     expect(getByText(/이번 세션 0\/0/)).not.toBeNull();
   });
 });
+
+describe("Quiz — 범위 표시", () => {
+  it("shows the quiz range on the board", () => {
+    const { container } = render(<Quiz />);
+    // 기본 범위(6·5번 줄) 밖인 1번 줄에 덮개
+    expect(container.querySelector("[data-testid='region-string-cover-1']")).not.toBeNull();
+  });
+});

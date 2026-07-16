@@ -205,7 +205,7 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
       <Fretboard notes={EMPTY_NOTES} labelMode="none" window={null} marks={marks}
                  interactive={quizMode === "findAll" && target !== null && !roundOver}
                  interactivePositions={rangeKeys}
-                 onPositionClick={handlePositionClick} />
+                 onPositionClick={handlePositionClick} activeRegion={range} />
 
       {quizMode === "nameThatNote" && question && (
         <div className="quiz-answers">

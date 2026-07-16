@@ -21,6 +21,7 @@ export interface FretboardProps {
   interactivePositions?: ReadonlySet<string>;
   onPositionClick?: (pos: FretPos) => void;
   marks?: ReadonlyMap<string, QuizMark>;
+  activeRegion?: { strings: readonly StringNo[]; fretMax: number } | null;
 }
 
 const W = 1180;
@@ -52,7 +53,7 @@ const fretX = (fret: number) => NUT_X + fret * FRET_W;          // 프렛선 x
 const noteX = (fret: number) =>
   fret === 0 ? OPEN_X : NUT_X + (fret - 0.5) * FRET_W;          // 노트 중심 x
 
-export function Fretboard({ notes, labelMode, window = null, colorMode = "root", interactive = false, interactivePositions, onPositionClick, marks }: FretboardProps) {
+export function Fretboard({ notes, labelMode, window = null, colorMode = "root", interactive = false, interactivePositions, onPositionClick, marks, activeRegion = null }: FretboardProps) {
   const midY = (stringY(3) + stringY(4)) / 2;
 
   return (
@@ -86,6 +87,25 @@ export function Fretboard({ notes, labelMode, window = null, colorMode = "root",
           {f}
         </text>
       ))}
+
+      {/* 출제 범위 밖 덮개 */}
+      {activeRegion && (
+        <g data-testid="active-region" pointerEvents="none">
+          {activeRegion.fretMax < FRET_COUNT && (
+            <rect data-testid="region-fret-cover"
+                  x={fretX(Math.max(activeRegion.fretMax, 0))} y={TOP_Y - 16}
+                  width={W - RIGHT_PAD - fretX(Math.max(activeRegion.fretMax, 0))}
+                  height={STRING_GAP * 5 + 32}
+                  fill="var(--bg)" opacity={0.6} />
+          )}
+          {STRINGS.filter((s) => !activeRegion.strings.includes(s)).map((s) => (
+            <rect key={s} data-testid={`region-string-cover-${s}`}
+                  x={OPEN_X - 14} y={stringY(s) - STRING_GAP / 2}
+                  width={W - OPEN_X} height={STRING_GAP}
+                  fill="var(--bg)" opacity={0.6} />
+          ))}
+        </g>
+      )}
 
       {/* 노트 */}
       {STRINGS.flatMap((str) =>
