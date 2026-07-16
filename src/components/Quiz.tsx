@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { STRINGS, posKey, type StringNo, type FretPos } from "@/theory/fretboard";
 import {
   DEFAULT_RANGE, makeFindAllTarget, makeNameQuestion, positionsInRange,
@@ -34,17 +34,35 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
     findAll: { asked: 0, correct: 0 },
   });
   const [stats, setStats] = useState<QuizStats>(emptyStats());
+  const recordedRef = useRef(false);
 
   useEffect(() => {
     setStats(loadStats()); // SSR 하이드레이션 불일치 방지: 마운트 후 로드
   }, []);
 
+  const resetProgress = () => {
+    setQuestion(null);
+    setPicked(null);
+    setTarget(null);
+    setFound(new Set());
+    setMisses(new Set());
+    setRevealed(false);
+    recordedRef.current = false;
+  };
+
   const toggleString = (s: StringNo) => {
-    setRange((r) => {
-      const has = r.strings.includes(s);
-      if (has && r.strings.length === 1) return r; // 최소 1현 유지
-      return { ...r, strings: has ? r.strings.filter((x) => x !== s) : [...r.strings, s] };
+    const has = range.strings.includes(s);
+    if (has && range.strings.length === 1) return; // 최소 1현 유지
+    setRange({
+      ...range,
+      strings: has ? range.strings.filter((x) => x !== s) : [...range.strings, s],
     });
+    resetProgress();
+  };
+
+  const changeFretMax = (fretMax: number) => {
+    setRange((r) => ({ ...r, fretMax }));
+    resetProgress();
   };
 
   const ask = () => {
@@ -70,16 +88,22 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
   const switchQuizMode = (id: QuizModeId) => {
     if (id === quizMode) return;
     setQuizMode(id);
-    setQuestion(null);
-    setPicked(null);
-    setTarget(null);
-    setFound(new Set());
-    setMisses(new Set());
-    setRevealed(false);
+    resetProgress();
   };
 
   const roundComplete = target !== null && found.size === target.positions.length;
   const roundOver = revealed || roundComplete;
+
+  useEffect(() => {
+    if (!target || !roundOver || recordedRef.current) return;
+    recordedRef.current = true;
+    const clean = roundComplete && misses.size === 0;
+    setSession((s) => ({
+      ...s,
+      findAll: { asked: s.findAll.asked + 1, correct: s.findAll.correct + (clean ? 1 : 0) },
+    }));
+    setStats(recordResult("findAll", clean, Date.now() - askedAt));
+  }, [target, roundOver, roundComplete, misses, askedAt]);
 
   const targetKeys = target ? new Set(target.positions.map(posKey)) : null;
   const rangeKeys = quizMode === "findAll" && target
@@ -87,6 +111,7 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
     : undefined;
 
   const startFind = () => {
+    recordedRef.current = false;
     setTarget(makeTarget(range));
     setFound(new Set());
     setMisses(new Set());
@@ -99,30 +124,15 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
     const k = posKey(pos);
     if (found.has(k) || misses.has(k)) return;
     if (targetKeys!.has(k)) {
-      const next = new Set(found);
-      next.add(k);
-      setFound(next);
-      if (next.size === target.positions.length) {
-        const clean = misses.size === 0;
-        setSession((s) => ({
-          ...s,
-          findAll: { asked: s.findAll.asked + 1, correct: s.findAll.correct + (clean ? 1 : 0) },
-        }));
-        setStats(recordResult("findAll", clean, Date.now() - askedAt));
-      }
+      setFound((prev) => new Set(prev).add(k));
     } else {
-      setMisses(new Set(misses).add(k));
+      setMisses((prev) => new Set(prev).add(k));
     }
   };
 
   const giveUp = () => {
     if (!target || roundOver) return;
     setRevealed(true);
-    setSession((s) => ({
-      ...s,
-      findAll: { asked: s.findAll.asked + 1, correct: s.findAll.correct },
-    }));
-    setStats(recordResult("findAll", false, Date.now() - askedAt));
   };
 
   const marks = new Map<string, QuizMark>();
@@ -172,7 +182,7 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
         <label>
           프렛 범위
           <select id="quiz-fret-max" value={range.fretMax}
-                  onChange={(e) => setRange((r) => ({ ...r, fretMax: Number(e.target.value) }))}>
+                  onChange={(e) => changeFretMax(Number(e.target.value))}>
             {FRET_MAX_OPTIONS.map((f) => <option key={f} value={f}>0~{f}</option>)}
           </select>
         </label>

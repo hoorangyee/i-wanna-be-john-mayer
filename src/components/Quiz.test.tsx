@@ -116,6 +116,26 @@ describe("Quiz — 모두 찾기", () => {
     expect(container.querySelector("[data-testid='hit-6-5']")).not.toBeNull();
     expect(container.querySelector("[data-testid='hit-4-2']")).toBeNull(); // 4번줄은 기본 범위 밖
   });
+
+  it("resets an active round when the range changes", () => {
+    const { getByRole, getByLabelText, container } = setup();
+    fireEvent.click(container.querySelector("[data-testid='hit-6-5']")!);
+    expect(container.querySelector("[data-testid='mark-6-5']")).not.toBeNull();
+    fireEvent.change(getByLabelText("프렛 범위"), { target: { value: "5" } });
+    expect(container.querySelector("[data-testid='mark-6-5']")).toBeNull();
+    expect(container.querySelector(".view-title")?.textContent).toBe("퀴즈 — 모두 찾기");
+    expect(getByRole("button", { name: "시작" })).not.toBeNull();
+  });
+
+  it("records a completed round exactly once even after further re-renders", () => {
+    const { getByRole, container } = setup();
+    fireEvent.click(container.querySelector("[data-testid='hit-6-5']")!);
+    fireEvent.click(container.querySelector("[data-testid='hit-5-0']")!);
+    // 완료 후 추가 상태 변화(현 토글 → 리셋 경로)에도 중복 기록 없어야 함
+    fireEvent.click(getByRole("button", { name: "4번" }));
+    const raw = window.localStorage.getItem("fretboard-quiz-stats-v1");
+    expect(JSON.parse(raw!).findAll.attempts).toBe(1);
+  });
 });
 
 describe("Quiz — 세션 카운터", () => {
