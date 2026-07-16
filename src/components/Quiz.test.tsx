@@ -69,9 +69,9 @@ describe("Quiz — 모두 찾기", () => {
   };
 
   it("shows the target and progress after start", () => {
-    const { getByText } = setup();
-    expect(getByText(/모든 A/)).not.toBeNull();
-    expect(getByText(/0\/2/)).not.toBeNull();
+    const { getByRole } = setup();
+    expect(getByRole("heading", { name: /모든 A/ })).not.toBeNull();
+    expect(getByRole("heading", { name: /0\/2/ })).not.toBeNull();
   });
 
   it("judges clicks and completes the round", () => {
