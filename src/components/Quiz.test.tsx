@@ -117,3 +117,16 @@ describe("Quiz — 모두 찾기", () => {
     expect(container.querySelector("[data-testid='hit-4-2']")).toBeNull(); // 4번줄은 기본 범위 밖
   });
 });
+
+describe("Quiz — 세션 카운터", () => {
+  it("keeps session counters per quiz mode", () => {
+    const { getByRole, getByText } = render(
+      <Quiz makeQuestion={() => stubQuestion} makeTarget={() => stubTarget} />
+    );
+    fireEvent.click(getByRole("button", { name: "시작" }));
+    fireEvent.click(getByRole("button", { name: "A" }));
+    expect(getByText(/이번 세션 1\/1/)).not.toBeNull();
+    fireEvent.click(getByRole("button", { name: "모두 찾기" }));
+    expect(getByText(/이번 세션 0\/0/)).not.toBeNull();
+  });
+});

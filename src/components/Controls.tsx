@@ -44,7 +44,7 @@ export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, 
         <>
           <label>
             {mode === "chord" ? "루트" : "키"}
-            <select value={keySel} onChange={(e) => onChange({ keySel: e.target.value as Key })}>
+            <select id="view-key" value={keySel} onChange={(e) => onChange({ keySel: e.target.value as Key })}>
               {KEYS.map((k) => <option key={k} value={k}>{k}</option>)}
             </select>
           </label>
@@ -52,7 +52,7 @@ export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, 
           {mode === "scale" ? (
             <label>
               스케일
-              <select value={scaleId}
+              <select id="view-scale" value={scaleId}
                       onChange={(e) => onChange({ scaleId: e.target.value as ScaleId, boxIndex: null })}>
                 {SCALE_IDS.map((id) => <option key={id} value={id}>{SCALES[id].name}</option>)}
               </select>
@@ -60,7 +60,7 @@ export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, 
           ) : (
             <label>
               코드
-              <select value={chordId}
+              <select id="view-chord" value={chordId}
                       onChange={(e) => onChange({ chordId: e.target.value as ChordId })}>
                 {CHORD_IDS.map((id) => (
                   <option key={id} value={id}>{keySel}{CHORDS[id].symbol} · {CHORDS[id].name}</option>

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { loadStats, recordResult, accuracy, avgMs, emptyStats } from "./stats";
 
 beforeEach(() => {
@@ -32,5 +32,14 @@ describe("stats", () => {
     expect(avgMs({ attempts: 0, correct: 0, totalMs: 0 })).toBeNull();
     expect(accuracy({ attempts: 4, correct: 3, totalMs: 8000 })).toBe(0.75);
     expect(avgMs({ attempts: 4, correct: 3, totalMs: 8000 })).toBe(2000);
+  });
+
+  it("does not throw when storage write fails", () => {
+    const spy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new Error("quota");
+    });
+    const s = recordResult("nameThatNote", true, 100);
+    expect(s.nameThatNote).toEqual({ attempts: 1, correct: 1, totalMs: 100 });
+    spy.mockRestore();
   });
 });

@@ -46,6 +46,10 @@ describe("makeNameQuestion", () => {
     expect(() => makeNameQuestion({ strings: [], fretMax: 12 })).toThrow("퀴즈 범위에 위치가 없습니다");
   });
 
+  it("negative fretMax yields an empty range and throws", () => {
+    expect(() => makeNameQuestion({ strings: [6], fretMax: -1 })).toThrow("퀴즈 범위에 위치가 없습니다");
+  });
+
   it("terminates and stays valid with a constant rng", () => {
     const q = makeNameQuestion({ strings: [6], fretMax: 3 }, () => 0);
     expect(q.pos).toEqual({ str: 6, fret: 0 });

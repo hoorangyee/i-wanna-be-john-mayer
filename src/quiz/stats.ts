@@ -41,7 +41,11 @@ export function recordResult(mode: QuizModeId, correct: boolean, elapsedMs: numb
   if (correct) m.correct += 1;
   m.totalMs += elapsedMs;
   if (typeof window !== "undefined") {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+    try {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+    } catch {
+      // 저장 실패(쿼터/프라이빗 모드)는 통계 기능 저하로만 취급 — UI 흐름을 깨지 않는다
+    }
   }
   return stats;
 }

@@ -20,6 +20,10 @@ describe("CHORDS", () => {
   it("CHORD_IDS preserves declaration order (maj first)", () => {
     expect(CHORD_IDS).toEqual(["maj", "m", "7", "maj7", "m7"]);
   });
+
+  it("CHORD_IDS covers every chord in CHORDS", () => {
+    expect([...CHORD_IDS].sort()).toEqual(Object.keys(CHORDS).sort());
+  });
 });
 
 describe("chordNoteMap", () => {

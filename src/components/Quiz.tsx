@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { STRINGS, posKey, type StringNo } from "@/theory/fretboard";
+import { STRINGS, posKey, type StringNo, type FretPos } from "@/theory/fretboard";
 import {
   DEFAULT_RANGE, makeFindAllTarget, makeNameQuestion, positionsInRange,
   type FindAllTarget, type NameQuestion, type QuizRange,
@@ -29,7 +29,10 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
   const [misses, setMisses] = useState<ReadonlySet<string>>(new Set());
   const [revealed, setRevealed] = useState(false);
   const [askedAt, setAskedAt] = useState(0);
-  const [session, setSession] = useState({ asked: 0, correct: 0 });
+  const [session, setSession] = useState({
+    nameThatNote: { asked: 0, correct: 0 },
+    findAll: { asked: 0, correct: 0 },
+  });
   const [stats, setStats] = useState<QuizStats>(emptyStats());
 
   useEffect(() => {
@@ -54,7 +57,13 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
     if (!question || picked !== null) return;
     setPicked(choice);
     const correct = choice === question.answer;
-    setSession((s) => ({ asked: s.asked + 1, correct: s.correct + (correct ? 1 : 0) }));
+    setSession((s) => ({
+      ...s,
+      nameThatNote: {
+        asked: s.nameThatNote.asked + 1,
+        correct: s.nameThatNote.correct + (correct ? 1 : 0),
+      },
+    }));
     setStats(recordResult("nameThatNote", correct, Date.now() - askedAt));
   };
 
@@ -85,7 +94,7 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
     setAskedAt(Date.now());
   };
 
-  const handlePositionClick = (pos: { str: StringNo; fret: number }) => {
+  const handlePositionClick = (pos: FretPos) => {
     if (!target || roundOver) return;
     const k = posKey(pos);
     if (found.has(k) || misses.has(k)) return;
@@ -95,7 +104,10 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
       setFound(next);
       if (next.size === target.positions.length) {
         const clean = misses.size === 0;
-        setSession((s) => ({ asked: s.asked + 1, correct: s.correct + (clean ? 1 : 0) }));
+        setSession((s) => ({
+          ...s,
+          findAll: { asked: s.findAll.asked + 1, correct: s.findAll.correct + (clean ? 1 : 0) },
+        }));
         setStats(recordResult("findAll", clean, Date.now() - askedAt));
       }
     } else {
@@ -106,7 +118,10 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
   const giveUp = () => {
     if (!target || roundOver) return;
     setRevealed(true);
-    setSession((s) => ({ asked: s.asked + 1, correct: s.correct }));
+    setSession((s) => ({
+      ...s,
+      findAll: { asked: s.findAll.asked + 1, correct: s.findAll.correct },
+    }));
     setStats(recordResult("findAll", false, Date.now() - askedAt));
   };
 
@@ -135,7 +150,7 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
   const avg = avgMs(m);
 
   return (
-    <section className="board quiz">
+    <section className="board">
       <div className="quiz-settings">
         <div className="seg" role="group" aria-label="출제 현">
           {STRINGS.map((s) => (
@@ -156,7 +171,7 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
         </div>
         <label>
           프렛 범위
-          <select value={range.fretMax}
+          <select id="quiz-fret-max" value={range.fretMax}
                   onChange={(e) => setRange((r) => ({ ...r, fretMax: Number(e.target.value) }))}>
             {FRET_MAX_OPTIONS.map((f) => <option key={f} value={f}>0~{f}</option>)}
           </select>
@@ -208,7 +223,7 @@ export function Quiz({ makeQuestion = makeNameQuestion, makeTarget = makeFindAll
       )}
 
       <p className="quiz-stats">
-        이번 세션 {session.correct}/{session.asked}
+        이번 세션 {session[quizMode].correct}/{session[quizMode].asked}
         {acc !== null && avg !== null &&
           ` · 누적 정답률 ${Math.round(acc * 100)}% · 평균 ${(avg / 1000).toFixed(1)}초`}
       </p>
