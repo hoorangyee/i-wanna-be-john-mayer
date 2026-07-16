@@ -10,7 +10,8 @@ const baseProps = {
   mode: "scale" as const,
   keySel: "A" as const,
   scaleId: "minorPentatonic" as const,
-  chordId: "7" as const,
+  quality: "dominant" as const,
+  exts: [] as const,
   labelMode: "name" as const,
   boxIndex: null,
   boxCount: 5,
@@ -37,17 +38,46 @@ describe("Controls (scale mode)", () => {
 describe("Controls (chord mode)", () => {
   const chordProps = { ...baseProps, mode: "chord" as const };
 
-  it("shows the chord select and hides scale select and position filter", () => {
-    const { queryByLabelText, queryByRole, getByLabelText } = render(<Controls {...chordProps} />);
+  it("shows the quality select and extension toggles, hides scale select and position filter", () => {
+    const { queryByLabelText, queryByRole, getByLabelText, getByRole } = render(<Controls {...chordProps} />);
     expect(getByLabelText("Chord")).not.toBeNull();
+    expect(getByRole("option", { name: "Dominant" })).not.toBeNull();
+    expect(getByRole("group", { name: "Extensions" })).not.toBeNull();
     expect(queryByLabelText("Scale")).toBeNull();
     expect(queryByRole("group", { name: "Position" })).toBeNull();
   });
 
-  it("labels the key select as Root and composes chord option text", () => {
-    const { getByLabelText, getByRole } = render(<Controls {...chordProps} />);
+  it("labels the key select as Root", () => {
+    const { getByLabelText } = render(<Controls {...chordProps} />);
     expect(getByLabelText("Root")).not.toBeNull();
-    expect(getByRole("option", { name: "A7 · Dominant 7" })).not.toBeNull();
+  });
+
+  it("extension toggles start unpressed and emit an added extension", () => {
+    const onChange = vi.fn();
+    const { getByRole } = render(<Controls {...chordProps} onChange={onChange} />);
+    const btn = getByRole("button", { name: "9th" });
+    expect(btn.getAttribute("aria-pressed")).toBe("false");
+    fireEvent.click(btn);
+    expect(onChange).toHaveBeenCalledWith({ exts: ["9"] });
+  });
+
+  it("toggling an active extension removes it, and additions keep 7→9→11 order", () => {
+    const onChange = vi.fn();
+    const { getByRole, rerender } = render(
+      <Controls {...chordProps} exts={["9"]} onChange={onChange} />
+    );
+    fireEvent.click(getByRole("button", { name: "9th" }));
+    expect(onChange).toHaveBeenCalledWith({ exts: [] });
+    rerender(<Controls {...chordProps} exts={["9"]} onChange={onChange} />);
+    fireEvent.click(getByRole("button", { name: "7th" }));
+    expect(onChange).toHaveBeenCalledWith({ exts: ["7", "9"] });
+  });
+
+  it("changing quality emits the new quality", () => {
+    const onChange = vi.fn();
+    const { getByLabelText } = render(<Controls {...chordProps} onChange={onChange} />);
+    fireEvent.change(getByLabelText("Chord"), { target: { value: "minor" } });
+    expect(onChange).toHaveBeenCalledWith({ quality: "minor" });
   });
 });
 
@@ -61,17 +91,13 @@ describe("Controls (quiz mode)", () => {
 describe("Controls (overlay mode)", () => {
   const overlayProps = { ...baseProps, mode: "overlay" as const, overlayRoot: "E" as const };
 
-  it("shows scale, chord-root and chord selects and hides the box filter", () => {
-    const { getByLabelText, queryByRole } = render(<Controls {...overlayProps} />);
+  it("shows scale, chord-root, quality selects and extension toggles, hides the box filter", () => {
+    const { getByLabelText, getByRole, queryByRole } = render(<Controls {...overlayProps} />);
     expect(getByLabelText("Key")).not.toBeNull();
     expect(getByLabelText("Scale")).not.toBeNull();
     expect(getByLabelText("Chord Root")).not.toBeNull();
     expect(getByLabelText("Chord")).not.toBeNull();
+    expect(getByRole("group", { name: "Extensions" })).not.toBeNull();
     expect(queryByRole("group", { name: "Position" })).toBeNull();
-  });
-
-  it("chord option text uses the overlay chord root", () => {
-    const { getByRole } = render(<Controls {...overlayProps} />);
-    expect(getByRole("option", { name: "E7 · Dominant 7" })).not.toBeNull();
   });
 });

@@ -1,5 +1,5 @@
 import type { ScaleId } from "@/theory/scales";
-import type { ChordId } from "@/theory/chords";
+import type { ChordQuality } from "@/theory/chords";
 
 export type Lang = "en" | "ko";
 
@@ -35,6 +35,8 @@ export interface Messages {
   // 범례
   legend: string; legendRoot: string; legendRoot1: string; legendScaleNote: string;
   legendThird: string; legendFifth: string; legendSeventh: string;
+  legendNinth: string; legendEleventh: string;
+  extensions: string;
   // 지판
   fretboard: string;
   hitLabel: (str: number, fret: number) => string;
@@ -74,6 +76,7 @@ export const MESSAGES: Record<Lang, Messages> = {
     positionGroup: "Position", positionAll: "All",
     legend: "Legend", legendRoot: "Root", legendRoot1: "Root (1)", legendScaleNote: "Scale notes",
     legendThird: "3rd", legendFifth: "5th", legendSeventh: "7th",
+    legendNinth: "9th", legendEleventh: "11th", extensions: "Extensions",
     fretboard: "Guitar fretboard",
     hitLabel: (str, fret) => `String ${str}, fret ${fret}`,
     soundOn: "Sound on", soundOff: "Sound off",
@@ -111,6 +114,7 @@ export const MESSAGES: Record<Lang, Messages> = {
     positionGroup: "포지션", positionAll: "전체",
     legend: "범례", legendRoot: "루트", legendRoot1: "루트 (1)", legendScaleNote: "스케일음",
     legendThird: "3도", legendFifth: "5도", legendSeventh: "7도",
+    legendNinth: "9도", legendEleventh: "11도", extensions: "확장",
     fretboard: "기타 지판",
     hitLabel: (str, fret) => `${str}번 줄 ${fret}프렛`,
     soundOn: "소리 켬", soundOff: "소리 끔",
@@ -159,7 +163,7 @@ export const SCALE_NAMES: Record<Lang, Record<ScaleId, string>> = {
   },
 };
 
-export const CHORD_NAMES: Record<Lang, Record<ChordId, string>> = {
-  en: { maj: "Major", m: "Minor", "7": "Dominant 7", maj7: "Major 7", m7: "Minor 7" },
-  ko: { maj: "메이저", m: "마이너", "7": "도미넌트 7", maj7: "메이저 7", m7: "마이너 7" },
+export const QUALITY_NAMES: Record<Lang, Record<ChordQuality, string>> = {
+  en: { major: "Major", minor: "Minor", dominant: "Dominant" },
+  ko: { major: "메이저", minor: "마이너", dominant: "도미넌트" },
 };

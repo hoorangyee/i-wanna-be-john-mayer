@@ -46,6 +46,8 @@ const TONE_FILL: Record<string, string> = {
   "3": "var(--tone-3)",
   "5": "var(--tone-5)",
   "7": "var(--tone-7)",
+  "9": "var(--tone-9)",
+  "11": "var(--tone-11)",
 };
 
 function degreeFill(degree: string): string {

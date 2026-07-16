@@ -1,7 +1,9 @@
 import { KEYS, type Key } from "@/theory/notes";
 import { SCALE_IDS, type ScaleId } from "@/theory/scales";
-import { CHORDS, CHORD_IDS, type ChordId } from "@/theory/chords";
-import { MESSAGES, SCALE_NAMES, CHORD_NAMES } from "@/lib/i18n";
+import {
+  EXTENSIONS, QUALITIES, normalizeExts, type ChordQuality, type Extension,
+} from "@/theory/chords";
+import { MESSAGES, SCALE_NAMES, QUALITY_NAMES } from "@/lib/i18n";
 import { useLang } from "@/lib/LangContext";
 import type { LabelMode } from "./Fretboard";
 
@@ -11,7 +13,8 @@ export interface ControlsProps {
   mode: Mode;
   keySel: Key;
   scaleId: ScaleId;
-  chordId: ChordId;
+  quality: ChordQuality;
+  exts: readonly Extension[];
   labelMode: LabelMode;
   boxIndex: number | null;
   boxCount: number | null;   // null = 이 스케일은 박스 미지원 (코드 모드에서도 null 전달)
@@ -19,7 +22,7 @@ export interface ControlsProps {
   onChange: (patch: Partial<Omit<ControlsProps, "onChange" | "boxCount">>) => void;
 }
 
-export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, boxCount, overlayRoot, onChange }: ControlsProps) {
+export function Controls({ mode, keySel, scaleId, quality, exts, labelMode, boxIndex, boxCount, overlayRoot, onChange }: ControlsProps) {
   const { lang } = useLang();
   const m = MESSAGES[lang];
   const LABEL_MODES: { id: LabelMode; label: string }[] = [
@@ -29,6 +32,11 @@ export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, 
   ];
 
   if (mode === "quiz") return null; // 퀴즈 설정은 Quiz가 자체 렌더
+
+  const toggleExt = (e: Extension) =>
+    onChange({
+      exts: exts.includes(e) ? exts.filter((x) => x !== e) : normalizeExts([...exts, e]),
+    });
 
   return (
     <div className="flex flex-wrap items-end gap-x-5 gap-y-3">
@@ -60,17 +68,26 @@ export function Controls({ mode, keySel, scaleId, chordId, labelMode, boxIndex, 
       )}
 
       {(mode === "chord" || mode === "overlay") && (
-        <label className="field">
-          {m.chord}
-          <select id="view-chord" value={chordId}
-                  onChange={(e) => onChange({ chordId: e.target.value as ChordId })}>
-            {CHORD_IDS.map((id) => (
-              <option key={id} value={id}>
-                {(mode === "chord" ? keySel : overlayRoot)}{CHORDS[id].symbol} · {CHORD_NAMES[lang][id]}
-              </option>
+        <>
+          <label className="field">
+            {m.chord}
+            <select id="view-quality" value={quality}
+                    onChange={(e) => onChange({ quality: e.target.value as ChordQuality })}>
+              {QUALITIES.map((q) => (
+                <option key={q} value={q}>{QUALITY_NAMES[lang][q]}</option>
+              ))}
+            </select>
+          </label>
+
+          <div className="seg" role="group" aria-label={m.extensions}>
+            {EXTENSIONS.map((e) => (
+              <button key={e} type="button" data-active={exts.includes(e)} aria-pressed={exts.includes(e)}
+                      onClick={() => toggleExt(e)}>
+                {e}th
+              </button>
             ))}
-          </select>
-        </label>
+          </div>
+        </>
       )}
 
       <div className="seg" role="group" aria-label={m.labelGroup}>

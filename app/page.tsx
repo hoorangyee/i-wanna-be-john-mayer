@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { scaleNoteMap } from "@/theory/scales";
-import { chordNoteMap, CHORDS } from "@/theory/chords";
+import { chordSymbol, chordToneMap } from "@/theory/chords";
 import { boxesFor } from "@/theory/boxes";
 import { playPosition } from "@/audio/tone";
 import { Fretboard } from "@/components/Fretboard";
@@ -14,14 +14,15 @@ import { LangToggle } from "@/components/LangToggle";
 import { Quiz } from "@/components/Quiz";
 import { Legend } from "@/components/Legend";
 import { parseViewQuery, viewQueryString, type UrlViewState } from "@/lib/viewUrl";
-import { MESSAGES, SCALE_NAMES, CHORD_NAMES } from "@/lib/i18n";
+import { MESSAGES, SCALE_NAMES, QUALITY_NAMES } from "@/lib/i18n";
 import { LangProvider, useLang } from "@/lib/LangContext";
 
 const DEFAULT_VIEW: UrlViewState = {
   mode: "scale",
   keySel: "A",
   scaleId: "minorPentatonic",
-  chordId: "7",
+  quality: "dominant",
+  exts: [],
   labelMode: "name",
   boxIndex: null,
   overlayRoot: "A",
@@ -56,18 +57,18 @@ function HomeInner() {
   const isQuiz = view.mode === "quiz";
 
   const notes = isChord
-    ? chordNoteMap(view.keySel, view.chordId)
+    ? chordToneMap(view.keySel, view.quality, view.exts)
     : scaleNoteMap(view.keySel, view.scaleId);
-  const overlayNotes = isOverlay ? chordNoteMap(view.overlayRoot, view.chordId) : undefined;
+  const overlayNotes = isOverlay ? chordToneMap(view.overlayRoot, view.quality, view.exts) : undefined;
   const boxes = view.mode === "scale" ? boxesFor(view.keySel, view.scaleId) : null;
   const activeWindow = view.boxIndex !== null && boxes ? boxes[view.boxIndex] : null;
 
   const scaleName = SCALE_NAMES[lang][view.scaleId];
-  const chordName = CHORD_NAMES[lang][view.chordId];
+  const symbol = chordSymbol(view.quality, view.exts);
   const title = isChord
-    ? m.titleChord(view.keySel, CHORDS[view.chordId].symbol, chordName)
+    ? m.titleChord(view.keySel, symbol, QUALITY_NAMES[lang][view.quality])
     : isOverlay
-      ? m.titleOverlay(view.keySel, scaleName, view.overlayRoot, CHORDS[view.chordId].symbol)
+      ? m.titleOverlay(view.keySel, scaleName, view.overlayRoot, symbol)
       : m.titleScale(view.keySel, scaleName, view.boxIndex);
 
   const legendMode = isChord ? "chord" : isOverlay ? "overlay" : "scale";
@@ -105,7 +106,8 @@ function HomeInner() {
                 mode={view.mode}
                 keySel={view.keySel}
                 scaleId={view.scaleId}
-                chordId={view.chordId}
+                quality={view.quality}
+                exts={view.exts}
                 labelMode={view.labelMode}
                 boxIndex={view.boxIndex}
                 boxCount={boxes ? boxes.length : null}
@@ -116,7 +118,7 @@ function HomeInner() {
             <section className="card">
               <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line px-5 py-3.5">
                 <h2 className="text-[17px] font-semibold tracking-tight">{title}</h2>
-                <Legend mode={legendMode} />
+                <Legend mode={legendMode} exts={view.exts} />
               </div>
               <div className="board-scroll px-5 py-4">
                 <Fretboard
