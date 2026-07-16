@@ -279,9 +279,11 @@ body {
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-/* ── 구 스타일 (마이그레이션 공존용 — Task 4~7에서 단계 삭제) ── */
-
+/* ── 모바일 ────────────────────────────────────────────────── */
 @media (max-width: 720px) {
-  .board-scroll { overflow-x: auto; }
   .fretboard { min-width: 900px; }
+  /* 오른쪽 에지 페이드 — 가로 스크롤 가능함을 암시 (의도된 단순 힌트) */
+  .board-scroll {
+    mask-image: linear-gradient(to right, black calc(100% - 24px), transparent);
+  }
 }
