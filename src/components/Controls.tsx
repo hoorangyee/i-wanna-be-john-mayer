@@ -37,7 +37,7 @@ export function Controls({ keySel, scaleId, labelMode, boxIndex, boxCount, onCha
 
       <div className="seg" role="group" aria-label="라벨 표시">
         {LABEL_MODES.map(({ id, label }) => (
-          <button key={id} data-active={labelMode === id}
+          <button key={id} data-active={labelMode === id} aria-pressed={labelMode === id}
                   onClick={() => onChange({ labelMode: id })}>
             {label}
           </button>
@@ -46,11 +46,11 @@ export function Controls({ keySel, scaleId, labelMode, boxIndex, boxCount, onCha
 
       {boxCount !== null && (
         <div className="seg" role="group" aria-label="포지션">
-          <button data-active={boxIndex === null} onClick={() => onChange({ boxIndex: null })}>
+          <button data-active={boxIndex === null} aria-pressed={boxIndex === null} onClick={() => onChange({ boxIndex: null })}>
             전체
           </button>
           {Array.from({ length: boxCount }, (_, i) => (
-            <button key={i} data-active={boxIndex === i}
+            <button key={i} data-active={boxIndex === i} aria-pressed={boxIndex === i}
                     onClick={() => onChange({ boxIndex: i })}>
               {i + 1}
             </button>

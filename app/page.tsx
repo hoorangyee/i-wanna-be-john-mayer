@@ -24,7 +24,7 @@ export default function Home() {
 
   const notes = scaleNoteMap(view.keySel, view.scaleId);
   const boxes = boxesFor(view.keySel, view.scaleId);
-  const window = view.boxIndex !== null && boxes ? boxes[view.boxIndex] : null;
+  const activeWindow = view.boxIndex !== null && boxes ? boxes[view.boxIndex] : null;
 
   return (
     <main>
@@ -44,7 +44,7 @@ export default function Home() {
           {view.keySel} {SCALES[view.scaleId].name}
           {view.boxIndex !== null ? ` — 박스 ${view.boxIndex + 1}` : ""}
         </h2>
-        <Fretboard notes={notes} labelMode={view.labelMode} window={window} />
+        <Fretboard notes={notes} labelMode={view.labelMode} window={activeWindow} />
       </section>
     </main>
   );
