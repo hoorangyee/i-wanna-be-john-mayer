@@ -2,6 +2,8 @@
 
 A guitar fretboard trainer for learning scales, chord tones, and the notes on the neck — built for players who want to *see* the fretboard the way great improvisers do.
 
+**▶ Live demo: [i-wanna-be-john-mayer.vercel.app](https://i-wanna-be-john-mayer.vercel.app)**
+
 ![Scale mode, light theme](docs/screenshots/scale-light.png)
 
 ## Features
