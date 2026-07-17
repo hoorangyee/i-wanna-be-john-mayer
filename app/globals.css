@@ -58,7 +58,7 @@
   --tone-3: #46996f;
   --tone-5: #6d8cc2;
   --tone-7: #9c77c9;
-  --tone-9: #c29347;
+  --tone-9: #b0813a; /* 흰 라벨 대비 3.47:1 — 다크 팔레트 하한선(3.2) 준수 */
   --tone-11: #4a9ea6;
   --mark-question: #d9a43a;
   --mark-correct: #46996f;
