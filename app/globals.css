@@ -20,8 +20,8 @@
   --fb-inlay: #e0dbd0;
 
   --note-scale: #4a7ba6;
-  --note-root: #d96c3d;
-  --note-root-ring: #a44b22;
+  --note-root: #d64560; /* 코럴 로즈 — 2026-07-17 사용자 결정 (흰 라벨 대비 4.30:1) */
+  --note-root-ring: #a52e45;
   --note-dim: #b9bdc9;
   --tone-3: #3d8b6b;
   --tone-5: #5f7fae;
@@ -52,8 +52,8 @@
   --fb-inlay: #3b362e;
 
   --note-scale: #5688b8;
-  --note-root: #e0703d;
-  --note-root-ring: #f2a67c;
+  --note-root: #e0566e; /* 코럴 로즈 다크 변형 (흰 라벨 대비 3.67:1) */
+  --note-root-ring: #f2a0ae;
   --note-dim: #4d5160;
   --tone-3: #46996f;
   --tone-5: #6d8cc2;
