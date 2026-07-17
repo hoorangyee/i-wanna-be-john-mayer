@@ -228,10 +228,6 @@ body {
   50% { translate: 3px 0; }
   75% { translate: -2px 0; }
 }
-@keyframes fade-in {
-  from { opacity: 0; }
-}
-
 .quiz-feedback {
   display: flex;
   align-items: center;

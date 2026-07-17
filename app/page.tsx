@@ -99,9 +99,8 @@ function HomeInner() {
           <Quiz />
         ) : (
           <>
-            {/* key={view.mode}: 모드 전환 시 내용 페이드 재생 */}
-            <div key={view.mode}
-                 className="card mb-4 min-h-[76px] px-4 py-3 animate-[fade-in_150ms_ease-out]">
+            {/* 모드 전환 시 리마운트 없이 내용만 교체 — min-h로 높이 고정(깜빡임 방지) */}
+            <div className="card mb-4 min-h-[76px] px-4 py-3">
               <Controls
                 mode={view.mode}
                 keySel={view.keySel}
