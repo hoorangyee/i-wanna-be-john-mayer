@@ -25,9 +25,12 @@ function itemsFor(mode: LegendProps["mode"], exts: readonly Extension[], m: Mess
     { label: m.legendThird, color: "var(--tone-3)" },
     { label: m.legendFifth, color: "var(--tone-5)" },
   ];
-  if (exts.includes("7")) items.push({ label: m.legendSeventh, color: "var(--tone-7)" });
-  if (exts.includes("9")) items.push({ label: m.legendNinth, color: "var(--tone-9)" });
-  if (exts.includes("11")) items.push({ label: m.legendEleventh, color: "var(--tone-11)" });
+  // 변형(b9 등)만 켜도 해당 슬롯 항목을 표시 — 정확한 변화표는 지판 도수 라벨이 담당 (스펙 §4)
+  const has = (...slot: Extension[]) => slot.some((s) => exts.includes(s));
+  if (has("7")) items.push({ label: m.legendSeventh, color: "var(--tone-7)" });
+  if (has("b9", "9", "#9")) items.push({ label: m.legendNinth, color: "var(--tone-9)" });
+  if (has("11", "#11")) items.push({ label: m.legendEleventh, color: "var(--tone-11)" });
+  if (has("13", "b13")) items.push({ label: m.legendThirteenth, color: "var(--tone-13)" });
   if (mode === "overlay") items.push({ label: m.legendScaleNote, color: "var(--note-dim)" });
   return items;
 }

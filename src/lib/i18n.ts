@@ -35,7 +35,7 @@ export interface Messages {
   // 범례
   legend: string; legendRoot: string; legendRoot1: string; legendScaleNote: string;
   legendThird: string; legendFifth: string; legendSeventh: string;
-  legendNinth: string; legendEleventh: string;
+  legendNinth: string; legendEleventh: string; legendThirteenth: string;
   extensions: string;
   // 지판
   fretboard: string;
@@ -76,7 +76,7 @@ export const MESSAGES: Record<Lang, Messages> = {
     positionGroup: "Position", positionAll: "All",
     legend: "Legend", legendRoot: "Root", legendRoot1: "Root (1)", legendScaleNote: "Scale notes",
     legendThird: "3rd", legendFifth: "5th", legendSeventh: "7th",
-    legendNinth: "9th", legendEleventh: "11th", extensions: "Extensions",
+    legendNinth: "9th", legendEleventh: "11th", legendThirteenth: "13th", extensions: "Extensions",
     fretboard: "Guitar fretboard",
     hitLabel: (str, fret) => `String ${str}, fret ${fret}`,
     soundOn: "Sound on", soundOff: "Sound off",
@@ -114,7 +114,7 @@ export const MESSAGES: Record<Lang, Messages> = {
     positionGroup: "포지션", positionAll: "전체",
     legend: "범례", legendRoot: "루트", legendRoot1: "루트 (1)", legendScaleNote: "스케일음",
     legendThird: "3도", legendFifth: "5도", legendSeventh: "7도",
-    legendNinth: "9도", legendEleventh: "11도", extensions: "확장",
+    legendNinth: "9도", legendEleventh: "11도", legendThirteenth: "13도", extensions: "확장",
     fretboard: "기타 지판",
     hitLabel: (str, fret) => `${str}번 줄 ${fret}프렛`,
     soundOn: "소리 켬", soundOff: "소리 끔",

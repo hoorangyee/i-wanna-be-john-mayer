@@ -35,4 +35,18 @@ describe("Legend", () => {
       expect(getByText(label)).not.toBeNull();
     }
   });
+
+  it("groups variant tensions under their slot swatch", () => {
+    const { getByText, queryByText } = render(<Legend mode="chord" exts={["b9", "#11"]} />);
+    expect(getByText("9th")).not.toBeNull();
+    expect(getByText("11th")).not.toBeNull();
+    expect(queryByText("7th")).toBeNull();
+  });
+
+  it("shows the 13th swatch when 13 or b13 is active", () => {
+    const { getByText, rerender } = render(<Legend mode="chord" exts={["13"]} />);
+    expect(getByText("13th")).not.toBeNull();
+    rerender(<Legend mode="chord" exts={["b13"]} />);
+    expect(getByText("13th")).not.toBeNull();
+  });
 });
