@@ -10,8 +10,10 @@ export const QUALITIES = [
   "major", "minor", "dominant", "diminished", "halfDiminished", "augmented",
 ] as const satisfies readonly ChordQuality[];
 
-export type Extension = "7" | "9" | "11";
-export const EXTENSIONS = ["7", "9", "11"] as const satisfies readonly Extension[];
+export type Extension = "7" | "b9" | "9" | "#9" | "11" | "#11" | "13" | "b13";
+export const EXTENSIONS = [
+  "7", "b9", "9", "#9", "11", "#11", "13", "b13",
+] as const satisfies readonly Extension[];
 
 interface Tone {
   interval: number;
@@ -78,10 +80,21 @@ const QUALITY_DEFS: Record<ChordQuality, QualityDef> = {
   },
 };
 
-// 9=장9(+2), 11=완전11(+5) — 변형 텐션(b9/#11 등)은 비목표 (스펙 §6)
-const UPPER_EXTENSIONS: Record<"9" | "11", Tone> = {
+// 변형 텐션은 도미넌트 전용 (스펙 §2) — UI 렌더·상태 전환·URL 파싱의 단일 유효성 소스
+const ALTERED: ReadonlySet<Extension> = new Set(["b9", "#9", "#11", "b13"]);
+
+export function allowedExts(quality: ChordQuality): readonly Extension[] {
+  return quality === "dominant" ? EXTENSIONS : EXTENSIONS.filter((e) => !ALTERED.has(e));
+}
+
+const UPPER_EXTENSIONS: Record<Exclude<Extension, "7">, Tone> = {
+  b9: { interval: 1, degree: "b9" },
   "9": { interval: 2, degree: "9" },
+  "#9": { interval: 3, degree: "#9" },
   "11": { interval: 5, degree: "11" },
+  "#11": { interval: 6, degree: "#11" },
+  "13": { interval: 9, degree: "13" },
+  b13: { interval: 8, degree: "b13" },
 };
 
 /** 확장 목록을 EXTENSIONS 순서로 정규화하고 중복을 제거한다. */
@@ -93,7 +106,7 @@ export function normalizeExts(exts: Iterable<Extension>): readonly Extension[] {
 export function chordSymbol(quality: ChordQuality, exts: readonly Extension[]): string {
   const def = QUALITY_DEFS[quality];
   const has7 = exts.includes("7");
-  const uppers = normalizeExts(exts).filter((e): e is "9" | "11" => e !== "7");
+  const uppers = normalizeExts(exts).filter((e): e is Exclude<Extension, "7"> => e !== "7");
   const base = has7 ? def.symbolWith7 : def.symbolBase;
   if (uppers.length === 0) return base;
   return has7
@@ -116,7 +129,7 @@ export function chordToneMap(
   const map = new Map<PitchClass, NoteInfo>();
   for (const { interval, degree } of tones) {
     const pc = (root + interval) % 12;
-    map.set(pc, { name: spellWith(pc, acc), degree, isRoot: interval === 0 });
+    if (!map.has(pc)) map.set(pc, { name: spellWith(pc, acc), degree, isRoot: interval === 0 });
   }
   return map;
 }

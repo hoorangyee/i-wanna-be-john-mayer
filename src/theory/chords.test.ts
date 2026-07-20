@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { chordToneMap, chordSymbol, normalizeExts } from "./chords";
+import { chordToneMap, chordSymbol, normalizeExts, allowedExts } from "./chords";
 
 describe("chordToneMap", () => {
   it("shows only the triad by default (A major = A C# E)", () => {
@@ -60,6 +60,10 @@ describe("normalizeExts", () => {
   it("dedupes and orders 7 → 9 → 11", () => {
     expect(normalizeExts(["11", "7", "7", "9"])).toEqual(["7", "9", "11"]);
   });
+
+  it("orders the 8 extensions as 7 → b9 → 9 → #9 → 11 → #11 → 13 → b13", () => {
+    expect(normalizeExts(["13", "b9", "7", "b9"])).toEqual(["7", "b9", "13"]);
+  });
 });
 
 describe("chordToneMap — new qualities", () => {
@@ -96,5 +100,44 @@ describe("chordSymbol — new qualities", () => {
     expect(chordSymbol("halfDiminished", ["7"])).toBe("m7b5");
     expect(chordSymbol("augmented", [])).toBe("aug");
     expect(chordSymbol("augmented", ["7"])).toBe("aug7");
+  });
+});
+
+describe("altered tensions & 13th", () => {
+  it("natural 13 is +9 (A major add13: F#)", () => {
+    expect(chordToneMap("A", "major", ["13"]).get(6)).toEqual({ name: "F#", degree: "13", isRoot: false });
+  });
+
+  it("altered tensions on dominant (A: b9=A#, #9=C, #11=D#, b13=F)", () => {
+    const map = chordToneMap("A", "dominant", ["b9", "#9", "#11", "b13"]);
+    expect(map.get(10)).toEqual({ name: "A#", degree: "b9", isRoot: false });
+    expect(map.get(0)).toEqual({ name: "C", degree: "#9", isRoot: false });
+    expect(map.get(3)).toEqual({ name: "D#", degree: "#11", isRoot: false });
+    expect(map.get(5)).toEqual({ name: "F", degree: "b13", isRoot: false });
+    expect(map.size).toBe(7); // 트라이어드 3 + 텐션 4
+  });
+
+  it("keeps the first tone on pitch-class collision (dim7 + 13 → bb7 wins)", () => {
+    const map = chordToneMap("A", "diminished", ["7", "13"]);
+    expect(map.size).toBe(4);
+    expect(map.get(6)!.degree).toBe("bb7");
+  });
+});
+
+describe("allowedExts", () => {
+  it("dominant allows all 8, others only naturals", () => {
+    expect(allowedExts("dominant")).toEqual(["7", "b9", "9", "#9", "11", "#11", "13", "b13"]);
+    expect(allowedExts("minor")).toEqual(["7", "9", "11", "13"]);
+    expect(allowedExts("diminished")).toEqual(["7", "9", "11", "13"]);
+  });
+});
+
+describe("chordSymbol — altered tensions & 13th", () => {
+  it("lists uppers in EXTENSIONS order, add-notation without 7", () => {
+    expect(chordSymbol("dominant", ["7", "b9", "#9"])).toBe("7(b9,#9)");
+    expect(chordSymbol("dominant", ["#9", "b9", "7"])).toBe("7(b9,#9)"); // 순서 정규화
+    expect(chordSymbol("dominant", ["7", "13"])).toBe("7(13)");
+    expect(chordSymbol("dominant", ["b9"])).toBe("(addb9)");
+    expect(chordSymbol("major", ["7", "9", "13"])).toBe("maj7(9,13)");
   });
 });
