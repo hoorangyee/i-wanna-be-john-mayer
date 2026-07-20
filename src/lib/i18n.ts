@@ -37,6 +37,7 @@ export interface Messages {
   legendThird: string; legendFifth: string; legendSeventh: string;
   legendNinth: string; legendEleventh: string; legendThirteenth: string;
   extensions: string;
+  extAltered: Record<"b9" | "#9" | "#11" | "b13", string>;
   // 지판
   fretboard: string;
   hitLabel: (str: number, fret: number) => string;
@@ -77,6 +78,10 @@ export const MESSAGES: Record<Lang, Messages> = {
     legend: "Legend", legendRoot: "Root", legendRoot1: "Root (1)", legendScaleNote: "Scale notes",
     legendThird: "3rd", legendFifth: "5th", legendSeventh: "7th",
     legendNinth: "9th", legendEleventh: "11th", legendThirteenth: "13th", extensions: "Extensions",
+    extAltered: {
+      b9: "b9, flat ninth", "#9": "#9, sharp ninth",
+      "#11": "#11, sharp eleventh", b13: "b13, flat thirteenth",
+    },
     fretboard: "Guitar fretboard",
     hitLabel: (str, fret) => `String ${str}, fret ${fret}`,
     soundOn: "Sound on", soundOff: "Sound off",
@@ -115,6 +120,10 @@ export const MESSAGES: Record<Lang, Messages> = {
     legend: "범례", legendRoot: "루트", legendRoot1: "루트 (1)", legendScaleNote: "스케일음",
     legendThird: "3도", legendFifth: "5도", legendSeventh: "7도",
     legendNinth: "9도", legendEleventh: "11도", legendThirteenth: "13도", extensions: "확장",
+    extAltered: {
+      b9: "b9, 플랫 9도", "#9": "#9, 샤프 9도",
+      "#11": "#11, 샤프 11도", b13: "b13, 플랫 13도",
+    },
     fretboard: "기타 지판",
     hitLabel: (str, fret) => `${str}번 줄 ${fret}프렛`,
     soundOn: "소리 켬", soundOff: "소리 끔",

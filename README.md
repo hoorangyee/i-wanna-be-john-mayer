@@ -12,7 +12,7 @@ A guitar fretboard trainer for learning scales, chord tones, and the notes on th
 Visualize five scales (Major, Natural Minor, Minor Pentatonic, Major Pentatonic, Blues) in any of the 12 keys across the full 22-fret neck. Switch note labels between names, scale degrees, or a clean unlabeled view, and isolate the five pentatonic box positions.
 
 ### 🎯 Chord Tones with Extensions
-Pick a root and a chord quality — **Major, Minor, Dominant, Diminished, Half-diminished, or Augmented** — and the triad (1 · 3 · 5, with ♭5/♯5 where the quality calls for it) lights up in degree colors. Toggle the **7th, 9th, 11th, and 13th** independently to stack extensions onto the neck, and on Dominant chords unlock the **altered tensions ♭9 · ♯9 · ♯11 · ♭13** for jazz voicings; the title, legend, and URL stay in sync (`A7(b9,#9)`, `Bdim7`, `Am7b5` …). The 7th automatically follows the quality (maj7 vs ♭7 vs 𝄫7).
+Pick a root and a chord quality — **Major, Minor, Dominant, Diminished, Half-diminished, or Augmented** — and the triad (1 · 3 · 5, with ♭5/♯5 where the quality calls for it) lights up in degree colors. Toggle the **7th, 9th, 11th, and 13th** independently to stack extensions onto the neck — Diminished omits the 13th, which is the same pitch as its 𝄫7 — and on Dominant chords unlock the **altered tensions ♭9 · ♯9 · ♯11 · ♭13** for jazz voicings; the title, legend, and URL stay in sync (`A7(b9,#9)`, `Bdim7`, `Am7b5` …). The 7th automatically follows the quality (maj7 vs ♭7 vs 𝄫7).
 
 ![Chord tones with 7th and 9th enabled](docs/screenshots/chord-extensions.png)
 
@@ -48,7 +48,7 @@ Scope questions to specific strings and fret ranges, and track session and lifet
 | Testing | [Vitest](https://vitest.dev) + Testing Library — 150+ tests over the theory engine, URL codec, and components |
 | Audio | Web Audio API (no dependencies) |
 
-The music-theory core (`src/theory`) is a small pure-function library — pitch-class math, key-aware note spelling (F♯ vs G♭), scale/chord formulas, and pentatonic box windows — fully unit-tested and independent of the UI.
+The music-theory core (`src/theory`) is a small pure-function library — pitch-class math, degree-aware note spelling (a C7's ♭9 spells D♭, not C♯), scale/chord formulas, and pentatonic box windows — fully unit-tested and independent of the UI.
 
 ## Getting Started
 

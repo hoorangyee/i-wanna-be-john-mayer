@@ -82,18 +82,18 @@ describe("Controls (chord mode)", () => {
 
   it("dominant shows altered-tension pills, other qualities only naturals", () => {
     const { getByRole, queryByRole, rerender } = render(<Controls {...chordProps} />);
-    for (const name of ["7th", "flat ninth", "9th", "sharp ninth", "11th", "sharp eleventh", "13th", "flat thirteenth"]) {
+    for (const name of ["7th", "b9, flat ninth", "9th", "#9, sharp ninth", "11th", "#11, sharp eleventh", "13th", "b13, flat thirteenth"]) {
       expect(getByRole("button", { name })).not.toBeNull();
     }
     rerender(<Controls {...chordProps} quality="minor" />);
-    expect(queryByRole("button", { name: "flat ninth" })).toBeNull();
-    expect(queryByRole("button", { name: "sharp eleventh" })).toBeNull();
+    expect(queryByRole("button", { name: "b9, flat ninth" })).toBeNull();
+    expect(queryByRole("button", { name: "#11, sharp eleventh" })).toBeNull();
     expect(getByRole("button", { name: "13th" })).not.toBeNull();
   });
 
   it("altered pills display the glyph but expose a spoken accessible name", () => {
     const { getByRole } = render(<Controls {...chordProps} />);
-    const btn = getByRole("button", { name: "flat ninth" });
+    const btn = getByRole("button", { name: "b9, flat ninth" });
     expect(btn.textContent).toBe("b9");
   });
 
@@ -109,7 +109,7 @@ describe("Controls (chord mode)", () => {
   it("altered pill toggles emit like natural ones", () => {
     const onChange = vi.fn();
     const { getByRole } = render(<Controls {...chordProps} exts={["7"]} onChange={onChange} />);
-    fireEvent.click(getByRole("button", { name: "flat ninth" }));
+    fireEvent.click(getByRole("button", { name: "b9, flat ninth" }));
     expect(onChange).toHaveBeenCalledWith({ exts: ["7", "b9"] });
   });
 });

@@ -97,6 +97,12 @@ describe("parseViewQuery", () => {
   it("drops the 13th for diminished (same pitch as bb7)", () => {
     expect(parseViewQuery("?mode=chord&quality=diminished&ext=7,13", D).exts).toEqual(["7"]);
   });
+
+  it("round-trips the diminished quality", () => {
+    const v: UrlViewState = { ...D, mode: "chord", quality: "diminished", exts: ["7"] };
+    expect(viewQueryString(v, D)).toBe("?mode=chord&quality=diminished&ext=7");
+    expect(parseViewQuery(viewQueryString(v, D), D)).toEqual(v);
+  });
 });
 
 describe("parseViewQuery — legacy chord param", () => {

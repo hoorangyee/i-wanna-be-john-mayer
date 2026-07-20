@@ -45,14 +45,15 @@ describe("scaleNoteMap", () => {
     expect(map.size).toBe(6);
   });
 
-  it("G minor pentatonic spells Bb (not A#) via relative-major preference", () => {
+  it("G minor pentatonic spells Bb (not A#)", () => {
     const map = scaleNoteMap("G", "minorPentatonic");
     expect(map.get(10)!.name).toBe("Bb");
   });
 
-  it("E blues b5 is spelled Bb by degree, regardless of relative-major sharp preference", () => {
-    const map = scaleNoteMap("E", "blues");
-    expect(map.get(10)!.name).toBe("Bb");
+  it("spells a flat-key minor scale with Cb/Fb rather than reusing letters", () => {
+    const map = scaleNoteMap("Ab", "naturalMinor");
+    const names = [...map.values()].map((v) => v.name);
+    expect(names).toEqual(["Ab", "Bb", "Cb", "Db", "Eb", "Fb", "Gb"]);
   });
 
   it("C natural minor spells Eb Ab Bb with flats", () => {

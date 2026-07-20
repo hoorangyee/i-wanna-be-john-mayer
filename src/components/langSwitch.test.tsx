@@ -54,4 +54,12 @@ describe("language switching", () => {
     expect(getByRole("option", { name: "하프 디미니시드" })).not.toBeNull();
     expect(getByRole("option", { name: "어그먼티드" })).not.toBeNull();
   });
+
+  it("speaks altered pill names in Korean", () => {
+    window.localStorage.setItem("fretboard-lang", "ko");
+    const { getByRole } = render(
+      <LangProvider><Controls {...controlsProps} mode="chord" /></LangProvider>
+    );
+    expect(getByRole("button", { name: "b9, 플랫 9도" })).not.toBeNull();
+  });
 });
