@@ -44,4 +44,14 @@ describe("language switching", () => {
     );
     expect(getByLabelText("Key")).not.toBeNull();
   });
+
+  it("renders Korean quality names in chord mode", () => {
+    window.localStorage.setItem("fretboard-lang", "ko");
+    const { getByRole } = render(
+      <LangProvider><Controls {...controlsProps} mode="chord" /></LangProvider>
+    );
+    expect(getByRole("option", { name: "디미니시드" })).not.toBeNull();
+    expect(getByRole("option", { name: "하프 디미니시드" })).not.toBeNull();
+    expect(getByRole("option", { name: "어그먼티드" })).not.toBeNull();
+  });
 });

@@ -164,6 +164,12 @@ export const SCALE_NAMES: Record<Lang, Record<ScaleId, string>> = {
 };
 
 export const QUALITY_NAMES: Record<Lang, Record<ChordQuality, string>> = {
-  en: { major: "Major", minor: "Minor", dominant: "Dominant" },
-  ko: { major: "메이저", minor: "마이너", dominant: "도미넌트" },
+  en: {
+    major: "Major", minor: "Minor", dominant: "Dominant",
+    diminished: "Diminished", halfDiminished: "Half-diminished", augmented: "Augmented",
+  },
+  ko: {
+    major: "메이저", minor: "마이너", dominant: "도미넌트",
+    diminished: "디미니시드", halfDiminished: "하프 디미니시드", augmented: "어그먼티드",
+  },
 };

@@ -3,8 +3,12 @@ import type { NoteInfo } from "./scales";
 
 // ── v3: 퀄리티 + 확장 모델 (스펙: 2026-07-17-chord-extensions-design.md) ──
 
-export type ChordQuality = "major" | "minor" | "dominant";
-export const QUALITIES = ["major", "minor", "dominant"] as const satisfies readonly ChordQuality[];
+export type ChordQuality =
+  | "major" | "minor" | "dominant"
+  | "diminished" | "halfDiminished" | "augmented";
+export const QUALITIES = [
+  "major", "minor", "dominant", "diminished", "halfDiminished", "augmented",
+] as const satisfies readonly ChordQuality[];
 
 export type Extension = "7" | "9" | "11";
 export const EXTENSIONS = ["7", "9", "11"] as const satisfies readonly Extension[];
@@ -17,6 +21,7 @@ interface Tone {
 interface QualityDef {
   family: ToneFamily;
   third: Tone;
+  fifth: Tone;
   seventh: Tone;      // 7th 종류는 퀄리티가 결정
   symbolBase: string; // 7 꺼짐 시 심볼
   symbolWith7: string;
@@ -26,6 +31,7 @@ const QUALITY_DEFS: Record<ChordQuality, QualityDef> = {
   major: {
     family: "major",
     third: { interval: 4, degree: "3" },
+    fifth: { interval: 7, degree: "5" },
     seventh: { interval: 11, degree: "7" },
     symbolBase: "",
     symbolWith7: "maj7",
@@ -33,6 +39,7 @@ const QUALITY_DEFS: Record<ChordQuality, QualityDef> = {
   minor: {
     family: "minor",
     third: { interval: 3, degree: "b3" },
+    fifth: { interval: 7, degree: "5" },
     seventh: { interval: 10, degree: "b7" },
     symbolBase: "m",
     symbolWith7: "m7",
@@ -40,9 +47,34 @@ const QUALITY_DEFS: Record<ChordQuality, QualityDef> = {
   dominant: {
     family: "major",
     third: { interval: 4, degree: "3" },
+    fifth: { interval: 7, degree: "5" },
     seventh: { interval: 10, degree: "b7" },
     symbolBase: "",
     symbolWith7: "7",
+  },
+  diminished: {
+    family: "minor",
+    third: { interval: 3, degree: "b3" },
+    fifth: { interval: 6, degree: "b5" },
+    seventh: { interval: 9, degree: "bb7" },
+    symbolBase: "dim",
+    symbolWith7: "dim7",
+  },
+  halfDiminished: {
+    family: "minor",
+    third: { interval: 3, degree: "b3" },
+    fifth: { interval: 6, degree: "b5" },
+    seventh: { interval: 10, degree: "b7" }, // 7 꺼짐 시 dim 트라이어드와 동일 표시 — dominant/major 전례
+    symbolBase: "dim",
+    symbolWith7: "m7b5",
+  },
+  augmented: {
+    family: "major",
+    third: { interval: 4, degree: "3" },
+    fifth: { interval: 8, degree: "#5" },
+    seventh: { interval: 10, degree: "b7" },
+    symbolBase: "aug",
+    symbolWith7: "aug7",
   },
 };
 
@@ -77,7 +109,7 @@ export function chordToneMap(
   const def = QUALITY_DEFS[quality];
   const root = keyToPc(key);
   const acc = preference(key, def.family);
-  const tones: Tone[] = [{ interval: 0, degree: "1" }, def.third, { interval: 7, degree: "5" }];
+  const tones: Tone[] = [{ interval: 0, degree: "1" }, def.third, def.fifth];
   for (const e of normalizeExts(exts)) {
     tones.push(e === "7" ? def.seventh : UPPER_EXTENSIONS[e]);
   }

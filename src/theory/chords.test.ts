@@ -61,3 +61,40 @@ describe("normalizeExts", () => {
     expect(normalizeExts(["11", "7", "7", "9"])).toEqual(["7", "9", "11"]);
   });
 });
+
+describe("chordToneMap — new qualities", () => {
+  it("diminished triad is 1 b3 b5 (A: A C D#)", () => {
+    const map = chordToneMap("A", "diminished", []);
+    expect(map.size).toBe(3);
+    expect(map.get(9)).toEqual({ name: "A", degree: "1", isRoot: true });
+    expect(map.get(0)).toEqual({ name: "C", degree: "b3", isRoot: false });
+    expect(map.get(3)).toEqual({ name: "D#", degree: "b5", isRoot: false });
+  });
+
+  it("diminished 7th is bb7 (A: F#)", () => {
+    expect(chordToneMap("A", "diminished", ["7"]).get(6)).toEqual({ name: "F#", degree: "bb7", isRoot: false });
+  });
+
+  it("halfDiminished shares the dim triad but takes b7 (A: G)", () => {
+    expect(chordToneMap("A", "halfDiminished", []).get(3)!.degree).toBe("b5");
+    expect(chordToneMap("A", "halfDiminished", ["7"]).get(7)).toEqual({ name: "G", degree: "b7", isRoot: false });
+  });
+
+  it("augmented triad is 1 3 #5 and takes b7 (A: A C# F, G)", () => {
+    const map = chordToneMap("A", "augmented", []);
+    expect(map.get(1)).toEqual({ name: "C#", degree: "3", isRoot: false });
+    expect(map.get(5)).toEqual({ name: "F", degree: "#5", isRoot: false });
+    expect(chordToneMap("A", "augmented", ["7"]).get(7)!.degree).toBe("b7");
+  });
+});
+
+describe("chordSymbol — new qualities", () => {
+  it("dim/halfDim/aug base and with-7 symbols", () => {
+    expect(chordSymbol("diminished", [])).toBe("dim");
+    expect(chordSymbol("diminished", ["7"])).toBe("dim7");
+    expect(chordSymbol("halfDiminished", [])).toBe("dim"); // 7 꺼짐 시 dim 트라이어드와 동일 표시 (스펙 §2)
+    expect(chordSymbol("halfDiminished", ["7"])).toBe("m7b5");
+    expect(chordSymbol("augmented", [])).toBe("aug");
+    expect(chordSymbol("augmented", ["7"])).toBe("aug7");
+  });
+});
