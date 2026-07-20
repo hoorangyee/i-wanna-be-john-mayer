@@ -39,8 +39,7 @@ const FRET_W = (W - NUT_X - RIGHT_PAD) / FRET_COUNT;
 const SINGLE_INLAYS = [3, 5, 7, 9, 15, 17, 19, 21];
 const FRET_NUMBERS = [...SINGLE_INLAYS, 12].sort((a, b) => a - b);
 
-// 주의: degreeFill이 'b'를 일괄 제거하므로 b5도 5와 같은 색이 된다.
-// 현 퀄리티 모델(major/minor/dominant)에는 b5가 없지만 dim 계열 추가 시 재검토할 것.
+// 주의: degreeFill이 변화표(b·#)를 일괄 제거하므로 b5·#5·bb7·b9·#9·#11·b13도 해당 슬롯 색이 된다.
 const TONE_FILL: Record<string, string> = {
   "1": "var(--note-root)",
   "3": "var(--tone-3)",
@@ -48,10 +47,11 @@ const TONE_FILL: Record<string, string> = {
   "7": "var(--tone-7)",
   "9": "var(--tone-9)",
   "11": "var(--tone-11)",
+  "13": "var(--tone-13)",
 };
 
 function degreeFill(degree: string): string {
-  return TONE_FILL[degree.replace("b", "")] ?? "var(--note-scale)";
+  return TONE_FILL[degree.replace(/[b#]/g, "")] ?? "var(--note-scale)";
 }
 
 const stringY = (str: StringNo) => TOP_Y + (str - 1) * STRING_GAP;

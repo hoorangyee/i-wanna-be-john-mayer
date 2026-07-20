@@ -28,6 +28,7 @@
   --tone-7: #8a63b3;
   --tone-9: #b0813a;
   --tone-11: #3e8f96;
+  --tone-13: #b05a9e; /* 로즈 마젠타 — 흰 라벨 대비 4.37:1, 루트 코럴 로즈·7 퍼플과 구분 */
   --mark-question: #e0a83c;
   --mark-correct: #3d8b6b;
   --mark-wrong: #c05252;
@@ -60,6 +61,7 @@
   --tone-7: #9c77c9;
   --tone-9: #b0813a; /* 흰 라벨 대비 3.47:1 — 다크 팔레트 하한선(3.2) 준수 */
   --tone-11: #4a9ea6;
+  --tone-13: #c06aae; /* 흰 라벨 대비 3.55:1 — 다크 팔레트 하한선(3.2) 준수 */
   --mark-question: #d9a43a;
   --mark-correct: #46996f;
   --mark-wrong: #d16060;

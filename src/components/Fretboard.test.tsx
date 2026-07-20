@@ -76,6 +76,17 @@ describe("Fretboard colorMode=degree", () => {
     );
     expect(fillOf(container, "note-6-4")).toBe("var(--note-scale)");
   });
+
+  it("colors altered tensions and the 13th by their slot color", () => {
+    const tensionNotes = chordToneMap("E", "dominant", ["b9", "#9", "13", "b13"]);
+    const { container } = render(
+      <Fretboard notes={tensionNotes} labelMode="degree" window={null} colorMode="degree" />
+    );
+    expect(fillOf(container, "note-6-1")).toBe("var(--tone-9)");  // F  = b9  → 9 슬롯
+    expect(fillOf(container, "note-6-3")).toBe("var(--tone-9)");  // G  = #9  → 9 슬롯
+    expect(fillOf(container, "note-6-9")).toBe("var(--tone-13)"); // C# = 13  → 13 슬롯
+    expect(fillOf(container, "note-6-8")).toBe("var(--tone-13)"); // C  = b13 → 13 슬롯
+  });
 });
 
 describe("Fretboard overlay", () => {
