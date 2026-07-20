@@ -128,7 +128,10 @@ describe("allowedExts", () => {
   it("dominant allows all 8, others only naturals", () => {
     expect(allowedExts("dominant")).toEqual(["7", "b9", "9", "#9", "11", "#11", "13", "b13"]);
     expect(allowedExts("minor")).toEqual(["7", "9", "11", "13"]);
-    expect(allowedExts("diminished")).toEqual(["7", "9", "11", "13"]);
+  });
+
+  it("diminished drops the 13th slot — it is the same pitch as bb7", () => {
+    expect(allowedExts("diminished")).toEqual(["7", "9", "11"]);
   });
 });
 

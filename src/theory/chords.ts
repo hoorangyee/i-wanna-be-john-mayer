@@ -73,11 +73,14 @@ const QUALITY_DEFS: Record<ChordQuality, QualityDef> = {
   },
 };
 
-// 변형 텐션은 도미넌트 전용 (스펙 §2) — UI 렌더·상태 전환·URL 파싱의 단일 유효성 소스
+// 변형 텐션은 도미넌트 전용. 디미니시의 13도는 bb7과 같은 음이라 독립 텐션이 아니므로 제외.
 const ALTERED: ReadonlySet<Extension> = new Set(["b9", "#9", "#11", "b13"]);
+const DIM_EXCLUDED: ReadonlySet<Extension> = new Set(["b13", "13"]);
 
 export function allowedExts(quality: ChordQuality): readonly Extension[] {
-  return quality === "dominant" ? EXTENSIONS : EXTENSIONS.filter((e) => !ALTERED.has(e));
+  if (quality === "dominant") return EXTENSIONS;
+  if (quality === "diminished") return EXTENSIONS.filter((e) => !ALTERED.has(e) && !DIM_EXCLUDED.has(e));
+  return EXTENSIONS.filter((e) => !ALTERED.has(e));
 }
 
 const UPPER_EXTENSIONS: Record<Exclude<Extension, "7">, Tone> = {

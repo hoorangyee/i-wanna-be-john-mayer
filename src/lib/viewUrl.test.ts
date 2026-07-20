@@ -74,8 +74,8 @@ describe("parseViewQuery", () => {
   });
 
   it("round-trips new qualities and the 13th", () => {
-    const v: UrlViewState = { ...D, mode: "chord", quality: "diminished", exts: ["7", "13"] };
-    expect(viewQueryString(v, D)).toBe("?mode=chord&quality=diminished&ext=7%2C13");
+    const v: UrlViewState = { ...D, mode: "chord", quality: "halfDiminished", exts: ["7", "13"] };
+    expect(viewQueryString(v, D)).toBe("?mode=chord&quality=halfDiminished&ext=7%2C13");
     expect(parseViewQuery(viewQueryString(v, D), D)).toEqual(v);
   });
 
@@ -92,6 +92,10 @@ describe("parseViewQuery", () => {
   it("drops altered tensions for non-dominant qualities on serialize", () => {
     expect(viewQueryString({ ...D, mode: "chord", quality: "minor", exts: ["7", "b9"] }, D))
       .toBe("?mode=chord&quality=minor&ext=7");
+  });
+
+  it("drops the 13th for diminished (same pitch as bb7)", () => {
+    expect(parseViewQuery("?mode=chord&quality=diminished&ext=7,13", D).exts).toEqual(["7"]);
   });
 });
 

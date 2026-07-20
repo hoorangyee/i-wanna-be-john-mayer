@@ -35,6 +35,10 @@ export function Controls({ mode, keySel, scaleId, quality, exts, labelMode, boxI
 
   const pills = allowedExts(quality);
   const extLabel = (e: Extension) => (/^\d+$/.test(e) ? `${e}th` : e); // 자연: 7th 식, 변형: b9 식 (양 언어 동일)
+  // 변형 필은 글리프만으로는 스크린리더가 구분하지 못한다 (#가 생략되거나 "number sign"으로 읽힘)
+  const extA11y: Record<string, string> = {
+    b9: "flat ninth", "#9": "sharp ninth", "#11": "sharp eleventh", b13: "flat thirteenth",
+  };
 
   const toggleExt = (e: Extension) =>
     onChange({
@@ -89,6 +93,7 @@ export function Controls({ mode, keySel, scaleId, quality, exts, labelMode, boxI
           <div className="seg" role="group" aria-label={m.extensions}>
             {pills.map((e) => (
               <button key={e} type="button" data-active={exts.includes(e)} aria-pressed={exts.includes(e)}
+                      aria-label={extA11y[e]}
                       onClick={() => toggleExt(e)}>
                 {extLabel(e)}
               </button>
