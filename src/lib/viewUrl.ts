@@ -1,7 +1,7 @@
 import { KEYS, type Key } from "@/theory/notes";
 import { SCALE_IDS, type ScaleId } from "@/theory/scales";
 import {
-  EXTENSIONS, QUALITIES, normalizeExts, type ChordQuality, type Extension,
+  EXTENSIONS, QUALITIES, allowedExts, normalizeExts, type ChordQuality, type Extension,
 } from "@/theory/chords";
 
 export type ViewMode = "scale" | "chord" | "overlay" | "quiz";
@@ -51,12 +51,15 @@ export function parseViewQuery(search: string, defaults: UrlViewState): UrlViewS
     p.get("quality") === null && p.get("ext") === null
       ? (LEGACY_CHORD[p.get("chord") ?? ""] ?? null)
       : null;
+  const quality = oneOf(p.get("quality"), QUALITIES) ?? legacy?.quality ?? defaults.quality;
+  const rawExts = parseExts(p.get("ext")) ?? legacy?.exts ?? defaults.exts;
+  const allowed = allowedExts(quality);
   return {
     mode: oneOf(p.get("mode"), MODES) ?? defaults.mode,
     keySel: oneOf(p.get("key"), KEYS) ?? defaults.keySel,
     scaleId: oneOf(p.get("scale"), SCALE_IDS) ?? defaults.scaleId,
-    quality: oneOf(p.get("quality"), QUALITIES) ?? legacy?.quality ?? defaults.quality,
-    exts: parseExts(p.get("ext")) ?? legacy?.exts ?? defaults.exts,
+    quality,
+    exts: rawExts.filter((e) => allowed.includes(e)),
     labelMode: oneOf(p.get("label"), LABELS) ?? defaults.labelMode,
     boxIndex: Number.isInteger(box) && box >= 1 && box <= 5 ? box - 1 : null,
     overlayRoot: oneOf(p.get("croot"), KEYS) ?? defaults.overlayRoot,
@@ -71,7 +74,8 @@ export function viewQueryString(view: UrlViewState, defaults: UrlViewState): str
   if (view.mode === "overlay" && view.overlayRoot !== defaults.overlayRoot) p.set("croot", view.overlayRoot);
   if (view.mode === "chord" || view.mode === "overlay") {
     if (view.quality !== defaults.quality) p.set("quality", view.quality);
-    const exts = normalizeExts(view.exts);
+    const allowed = allowedExts(view.quality);
+    const exts = normalizeExts(view.exts).filter((e) => allowed.includes(e));
     if (exts.length > 0) p.set("ext", exts.join(",")); // 기본값은 빈 목록
   }
   if (view.mode !== "quiz" && view.labelMode !== defaults.labelMode) p.set("label", view.labelMode);

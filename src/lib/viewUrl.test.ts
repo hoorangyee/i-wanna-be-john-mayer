@@ -55,7 +55,7 @@ describe("parseViewQuery", () => {
   });
 
   it("falls back to defaults on invalid values", () => {
-    expect(parseViewQuery("?mode=nope&key=H&quality=aug&ext=13&box=99", D)).toEqual(D);
+    expect(parseViewQuery("?mode=nope&key=H&quality=aug&ext=b7&box=99", D)).toEqual(D);
   });
 
   it("normalizes ext order and duplicates", () => {
@@ -71,6 +71,27 @@ describe("parseViewQuery", () => {
   it("round-trips an overlay view", () => {
     const v: UrlViewState = { ...D, mode: "overlay", overlayRoot: "Bb", quality: "minor", exts: ["7", "11"] };
     expect(parseViewQuery(viewQueryString(v, D), D)).toEqual(v);
+  });
+
+  it("round-trips new qualities and the 13th", () => {
+    const v: UrlViewState = { ...D, mode: "chord", quality: "diminished", exts: ["7", "13"] };
+    expect(viewQueryString(v, D)).toBe("?mode=chord&quality=diminished&ext=7%2C13");
+    expect(parseViewQuery(viewQueryString(v, D), D)).toEqual(v);
+  });
+
+  it("round-trips altered tensions with URL encoding (# → %23)", () => {
+    const v: UrlViewState = { ...D, mode: "chord", exts: ["7", "b9", "#9"] };
+    expect(viewQueryString(v, D)).toBe("?mode=chord&ext=7%2Cb9%2C%239");
+    expect(parseViewQuery(viewQueryString(v, D), D)).toEqual(v);
+  });
+
+  it("drops altered tensions for non-dominant qualities on parse", () => {
+    expect(parseViewQuery("?mode=chord&quality=minor&ext=7,b9,13", D).exts).toEqual(["7", "13"]);
+  });
+
+  it("drops altered tensions for non-dominant qualities on serialize", () => {
+    expect(viewQueryString({ ...D, mode: "chord", quality: "minor", exts: ["7", "b9"] }, D))
+      .toBe("?mode=chord&quality=minor&ext=7");
   });
 });
 
