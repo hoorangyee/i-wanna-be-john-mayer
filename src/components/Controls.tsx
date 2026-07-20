@@ -1,7 +1,7 @@
 import { KEYS, type Key } from "@/theory/notes";
 import { SCALE_IDS, type ScaleId } from "@/theory/scales";
 import {
-  EXTENSIONS, QUALITIES, normalizeExts, type ChordQuality, type Extension,
+  allowedExts, QUALITIES, normalizeExts, type ChordQuality, type Extension,
 } from "@/theory/chords";
 import { MESSAGES, SCALE_NAMES, QUALITY_NAMES } from "@/lib/i18n";
 import { useLang } from "@/lib/LangContext";
@@ -32,6 +32,9 @@ export function Controls({ mode, keySel, scaleId, quality, exts, labelMode, boxI
   ];
 
   if (mode === "quiz") return null; // 퀴즈 설정은 Quiz가 자체 렌더
+
+  const pills = allowedExts(quality);
+  const extLabel = (e: Extension) => (/^\d+$/.test(e) ? `${e}th` : e); // 자연: 7th 식, 변형: b9 식 (양 언어 동일)
 
   const toggleExt = (e: Extension) =>
     onChange({
@@ -72,7 +75,11 @@ export function Controls({ mode, keySel, scaleId, quality, exts, labelMode, boxI
           <label className="field">
             {m.chord}
             <select id="view-quality" value={quality}
-                    onChange={(e) => onChange({ quality: e.target.value as ChordQuality })}>
+                    onChange={(e) => {
+                      const q = e.target.value as ChordQuality;
+                      const keep = allowedExts(q);
+                      onChange({ quality: q, exts: exts.filter((x) => keep.includes(x)) });
+                    }}>
               {QUALITIES.map((q) => (
                 <option key={q} value={q}>{QUALITY_NAMES[lang][q]}</option>
               ))}
@@ -80,10 +87,10 @@ export function Controls({ mode, keySel, scaleId, quality, exts, labelMode, boxI
           </label>
 
           <div className="seg" role="group" aria-label={m.extensions}>
-            {EXTENSIONS.map((e) => (
+            {pills.map((e) => (
               <button key={e} type="button" data-active={exts.includes(e)} aria-pressed={exts.includes(e)}
                       onClick={() => toggleExt(e)}>
-                {e}th
+                {extLabel(e)}
               </button>
             ))}
           </div>

@@ -73,11 +73,38 @@ describe("Controls (chord mode)", () => {
     expect(onChange).toHaveBeenCalledWith({ exts: ["7", "9"] });
   });
 
-  it("changing quality emits the new quality", () => {
+  it("changing quality emits the new quality with filtered extensions", () => {
     const onChange = vi.fn();
     const { getByLabelText } = render(<Controls {...chordProps} onChange={onChange} />);
     fireEvent.change(getByLabelText("Chord"), { target: { value: "minor" } });
-    expect(onChange).toHaveBeenCalledWith({ quality: "minor" });
+    expect(onChange).toHaveBeenCalledWith({ quality: "minor", exts: [] });
+  });
+
+  it("dominant shows altered-tension pills, other qualities only naturals", () => {
+    const { getByRole, queryByRole, rerender } = render(<Controls {...chordProps} />);
+    for (const name of ["7th", "b9", "9th", "#9", "11th", "#11", "13th", "b13"]) {
+      expect(getByRole("button", { name })).not.toBeNull();
+    }
+    rerender(<Controls {...chordProps} quality="minor" />);
+    expect(queryByRole("button", { name: "b9" })).toBeNull();
+    expect(queryByRole("button", { name: "#11" })).toBeNull();
+    expect(getByRole("button", { name: "13th" })).not.toBeNull();
+  });
+
+  it("switching quality away from dominant drops altered extensions but keeps naturals", () => {
+    const onChange = vi.fn();
+    const { getByLabelText } = render(
+      <Controls {...chordProps} exts={["7", "b9", "13"]} onChange={onChange} />
+    );
+    fireEvent.change(getByLabelText("Chord"), { target: { value: "minor" } });
+    expect(onChange).toHaveBeenCalledWith({ quality: "minor", exts: ["7", "13"] });
+  });
+
+  it("altered pill toggles emit like natural ones", () => {
+    const onChange = vi.fn();
+    const { getByRole } = render(<Controls {...chordProps} exts={["7"]} onChange={onChange} />);
+    fireEvent.click(getByRole("button", { name: "b9" }));
+    expect(onChange).toHaveBeenCalledWith({ exts: ["7", "b9"] });
   });
 });
 
