@@ -1,4 +1,4 @@
-import { type Key, type PitchClass, type ToneFamily, keyToPc, preference, spellWith } from "./notes";
+import { type Key, type PitchClass, keyToPc, spellDegree } from "./notes";
 
 export interface ScaleDef {
   name: string;
@@ -16,14 +16,6 @@ export const SCALES = {
 export type ScaleId = keyof typeof SCALES;
 export const SCALE_IDS = Object.keys(SCALES) as readonly ScaleId[];
 
-const SCALE_FAMILY: Record<ScaleId, ToneFamily> = {
-  major: "major",
-  majorPentatonic: "major",
-  naturalMinor: "minor",
-  minorPentatonic: "minor",
-  blues: "minor",
-};
-
 const DEGREE_NAMES = ["1", "b2", "2", "b3", "3", "4", "b5", "5", "b6", "6", "b7", "7"];
 
 export function degreeLabel(interval: number): string {
@@ -38,13 +30,13 @@ export interface NoteInfo {
 
 export function scaleNoteMap(key: Key, scaleId: ScaleId): Map<PitchClass, NoteInfo> {
   const root = keyToPc(key);
-  const acc = preference(key, SCALE_FAMILY[scaleId]);
   const map = new Map<PitchClass, NoteInfo>();
   for (const interval of SCALES[scaleId].intervals) {
     const pc = (root + interval) % 12;
+    const degree = degreeLabel(interval);
     map.set(pc, {
-      name: spellWith(pc, acc),
-      degree: degreeLabel(interval),
+      name: spellDegree(key, degree, pc),
+      degree,
       isRoot: interval === 0,
     });
   }

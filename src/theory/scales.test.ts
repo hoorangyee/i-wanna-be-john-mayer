@@ -41,7 +41,7 @@ describe("scaleNoteMap", () => {
 
   it("E blues includes the b5", () => {
     const map = scaleNoteMap("E", "blues");
-    expect(map.get(10)).toEqual({ name: "A#", degree: "b5", isRoot: false });
+    expect(map.get(10)).toEqual({ name: "Bb", degree: "b5", isRoot: false });
     expect(map.size).toBe(6);
   });
 
@@ -50,9 +50,9 @@ describe("scaleNoteMap", () => {
     expect(map.get(10)!.name).toBe("Bb");
   });
 
-  it("E blues keeps sharp spelling (relative major G is sharp)", () => {
+  it("E blues b5 is spelled Bb by degree, regardless of relative-major sharp preference", () => {
     const map = scaleNoteMap("E", "blues");
-    expect(map.get(10)!.name).toBe("A#");
+    expect(map.get(10)!.name).toBe("Bb");
   });
 
   it("C natural minor spells Eb Ab Bb with flats", () => {

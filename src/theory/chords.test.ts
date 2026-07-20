@@ -67,16 +67,16 @@ describe("normalizeExts", () => {
 });
 
 describe("chordToneMap — new qualities", () => {
-  it("diminished triad is 1 b3 b5 (A: A C D#)", () => {
+  it("diminished triad is 1 b3 b5 (A: A C Eb)", () => {
     const map = chordToneMap("A", "diminished", []);
     expect(map.size).toBe(3);
     expect(map.get(9)).toEqual({ name: "A", degree: "1", isRoot: true });
     expect(map.get(0)).toEqual({ name: "C", degree: "b3", isRoot: false });
-    expect(map.get(3)).toEqual({ name: "D#", degree: "b5", isRoot: false });
+    expect(map.get(3)).toEqual({ name: "Eb", degree: "b5", isRoot: false });
   });
 
-  it("diminished 7th is bb7 (A: F#)", () => {
-    expect(chordToneMap("A", "diminished", ["7"]).get(6)).toEqual({ name: "F#", degree: "bb7", isRoot: false });
+  it("diminished 7th is bb7 (A: Gb)", () => {
+    expect(chordToneMap("A", "diminished", ["7"]).get(6)).toEqual({ name: "Gb", degree: "bb7", isRoot: false });
   });
 
   it("halfDiminished shares the dim triad but takes b7 (A: G)", () => {
@@ -84,10 +84,10 @@ describe("chordToneMap — new qualities", () => {
     expect(chordToneMap("A", "halfDiminished", ["7"]).get(7)).toEqual({ name: "G", degree: "b7", isRoot: false });
   });
 
-  it("augmented triad is 1 3 #5 and takes b7 (A: A C# F, G)", () => {
+  it("augmented triad is 1 3 #5 and takes b7 (A: A C# E#, G)", () => {
     const map = chordToneMap("A", "augmented", []);
     expect(map.get(1)).toEqual({ name: "C#", degree: "3", isRoot: false });
-    expect(map.get(5)).toEqual({ name: "F", degree: "#5", isRoot: false });
+    expect(map.get(5)).toEqual({ name: "E#", degree: "#5", isRoot: false });
     expect(chordToneMap("A", "augmented", ["7"]).get(7)!.degree).toBe("b7");
   });
 });
@@ -108,10 +108,10 @@ describe("altered tensions & 13th", () => {
     expect(chordToneMap("A", "major", ["13"]).get(6)).toEqual({ name: "F#", degree: "13", isRoot: false });
   });
 
-  it("altered tensions on dominant (A: b9=A#, #9=C, #11=D#, b13=F)", () => {
+  it("altered tensions on dominant (A: b9=Bb, #9=B#, #11=D#, b13=F)", () => {
     const map = chordToneMap("A", "dominant", ["b9", "#9", "#11", "b13"]);
-    expect(map.get(10)).toEqual({ name: "A#", degree: "b9", isRoot: false });
-    expect(map.get(0)).toEqual({ name: "C", degree: "#9", isRoot: false });
+    expect(map.get(10)).toEqual({ name: "Bb", degree: "b9", isRoot: false });
+    expect(map.get(0)).toEqual({ name: "B#", degree: "#9", isRoot: false });
     expect(map.get(3)).toEqual({ name: "D#", degree: "#11", isRoot: false });
     expect(map.get(5)).toEqual({ name: "F", degree: "b13", isRoot: false });
     expect(map.size).toBe(7); // 트라이어드 3 + 텐션 4

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { KEYS, keyToPc, spell, preference, spellWith } from "./notes";
+import { KEYS, keyToPc, spell, preference, spellWith, spellDegree } from "./notes";
 
 describe("keyToPc", () => {
   it("maps canonical keys to pitch classes", () => {
@@ -66,5 +66,31 @@ describe("spellWith", () => {
     expect(spellWith(10, "sharp")).toBe("A#");
     expect(spellWith(-2, "flat")).toBe("Bb");
     expect(spellWith(13, "sharp")).toBe("C#");
+  });
+});
+
+describe("spellDegree", () => {
+  it("spells a tension by its degree, not the chromatic table (C7 b9 = Db, not C#)", () => {
+    expect(spellDegree("C", "b9", 1)).toBe("Db");
+    expect(spellDegree("A", "b9", 10)).toBe("Bb");
+  });
+
+  it("spells altered fifths by letter (A dim b5 = Eb, F aug #5 = C#)", () => {
+    expect(spellDegree("A", "b5", 3)).toBe("Eb");
+    expect(spellDegree("F", "#5", 1)).toBe("C#");
+  });
+
+  it("root spells back to the key name", () => {
+    expect(spellDegree("Db", "1", 1)).toBe("Db");
+    expect(spellDegree("F#", "1", 6)).toBe("F#");
+  });
+
+  it("simplifies double accidentals to their enharmonic (C dim bb7 = A, E7 #9 = G)", () => {
+    expect(spellDegree("C", "bb7", 9)).toBe("A");
+    expect(spellDegree("E", "#9", 7)).toBe("G");
+  });
+
+  it("falls back to key preference for unknown degrees", () => {
+    expect(spellDegree("Bb", "b13x", 3)).toBe("Eb");
   });
 });

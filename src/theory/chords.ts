@@ -1,4 +1,4 @@
-import { type Key, type PitchClass, type ToneFamily, keyToPc, preference, spellWith } from "./notes";
+import { type Key, type PitchClass, keyToPc, spellDegree } from "./notes";
 import type { NoteInfo } from "./scales";
 
 // ── v3: 퀄리티 + 확장 모델 (스펙: 2026-07-17-chord-extensions-design.md) ──
@@ -21,7 +21,6 @@ interface Tone {
 }
 
 interface QualityDef {
-  family: ToneFamily;
   third: Tone;
   fifth: Tone;
   seventh: Tone;      // 7th 종류는 퀄리티가 결정
@@ -31,7 +30,6 @@ interface QualityDef {
 
 const QUALITY_DEFS: Record<ChordQuality, QualityDef> = {
   major: {
-    family: "major",
     third: { interval: 4, degree: "3" },
     fifth: { interval: 7, degree: "5" },
     seventh: { interval: 11, degree: "7" },
@@ -39,7 +37,6 @@ const QUALITY_DEFS: Record<ChordQuality, QualityDef> = {
     symbolWith7: "maj7",
   },
   minor: {
-    family: "minor",
     third: { interval: 3, degree: "b3" },
     fifth: { interval: 7, degree: "5" },
     seventh: { interval: 10, degree: "b7" },
@@ -47,7 +44,6 @@ const QUALITY_DEFS: Record<ChordQuality, QualityDef> = {
     symbolWith7: "m7",
   },
   dominant: {
-    family: "major",
     third: { interval: 4, degree: "3" },
     fifth: { interval: 7, degree: "5" },
     seventh: { interval: 10, degree: "b7" },
@@ -55,7 +51,6 @@ const QUALITY_DEFS: Record<ChordQuality, QualityDef> = {
     symbolWith7: "7",
   },
   diminished: {
-    family: "minor",
     third: { interval: 3, degree: "b3" },
     fifth: { interval: 6, degree: "b5" },
     seventh: { interval: 9, degree: "bb7" },
@@ -63,7 +58,6 @@ const QUALITY_DEFS: Record<ChordQuality, QualityDef> = {
     symbolWith7: "dim7",
   },
   halfDiminished: {
-    family: "minor",
     third: { interval: 3, degree: "b3" },
     fifth: { interval: 6, degree: "b5" },
     seventh: { interval: 10, degree: "b7" }, // 7 꺼짐 시 dim 트라이어드와 동일 표시 — dominant/major 전례
@@ -71,7 +65,6 @@ const QUALITY_DEFS: Record<ChordQuality, QualityDef> = {
     symbolWith7: "m7b5",
   },
   augmented: {
-    family: "major",
     third: { interval: 4, degree: "3" },
     fifth: { interval: 8, degree: "#5" },
     seventh: { interval: 10, degree: "b7" },
@@ -121,7 +114,6 @@ export function chordToneMap(
 ): Map<PitchClass, NoteInfo> {
   const def = QUALITY_DEFS[quality];
   const root = keyToPc(key);
-  const acc = preference(key, def.family);
   const tones: Tone[] = [{ interval: 0, degree: "1" }, def.third, def.fifth];
   for (const e of normalizeExts(exts)) {
     tones.push(e === "7" ? def.seventh : UPPER_EXTENSIONS[e]);
@@ -129,7 +121,7 @@ export function chordToneMap(
   const map = new Map<PitchClass, NoteInfo>();
   for (const { interval, degree } of tones) {
     const pc = (root + interval) % 12;
-    if (!map.has(pc)) map.set(pc, { name: spellWith(pc, acc), degree, isRoot: interval === 0 });
+    if (!map.has(pc)) map.set(pc, { name: spellDegree(key, degree, pc), degree, isRoot: interval === 0 });
   }
   return map;
 }
