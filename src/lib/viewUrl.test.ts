@@ -10,6 +10,9 @@ const D: UrlViewState = {
   labelMode: "name",
   boxIndex: null,
   overlayRoot: "A",
+  progOn: false,
+  prog: [],
+  progIndex: 0,
 };
 
 describe("viewQueryString", () => {
@@ -123,5 +126,111 @@ describe("parseViewQuery — legacy chord param", () => {
 
   it("ignores unknown legacy values", () => {
     expect(parseViewQuery("?mode=chord&chord=dim", D)).toMatchObject({ quality: "dominant", exts: [] });
+  });
+});
+
+describe("progression state", () => {
+  const PROG: UrlViewState = {
+    ...D,
+    mode: "chord",
+    progOn: true,
+    prog: [
+      { root: "A", quality: "minor", exts: ["7"] },
+      { root: "D", quality: "dominant", exts: ["7", "b9"] },
+    ],
+    progIndex: 1,
+    // 단일 코드 필드는 언제나 지금 보이는 코드를 비춘다
+    keySel: "D",
+    quality: "dominant",
+    exts: ["7", "b9"],
+  };
+
+  it("serializes chords and the selected index", () => {
+    expect(viewQueryString(PROG, D))
+      .toBe("?mode=chord&prog=A%3Aminor%3A7%3BD%3Adominant%3A7%2Cb9&pi=1");
+  });
+
+  it("round-trips", () => {
+    expect(parseViewQuery(viewQueryString(PROG, D), D)).toEqual(PROG);
+  });
+
+  it("omits pi when the first chord is selected", () => {
+    const v = { ...PROG, progIndex: 0, keySel: "A" as const, quality: "minor" as const, exts: ["7"] as const };
+    expect(viewQueryString(v, D)).toBe("?mode=chord&prog=A%3Aminor%3A7%3BD%3Adominant%3A7%2Cb9");
+  });
+
+  it("drops the ext field for chords without tensions", () => {
+    const v: UrlViewState = {
+      ...D, mode: "chord", progOn: true, keySel: "C", quality: "major", exts: [],
+      prog: [{ root: "C", quality: "major", exts: [] }],
+    };
+    expect(viewQueryString(v, D)).toBe("?mode=chord&prog=C%3Amajor");
+    expect(parseViewQuery(viewQueryString(v, D), D)).toEqual(v);
+  });
+
+  it("survives sharps in roots and tensions", () => {
+    const v: UrlViewState = {
+      ...D, mode: "chord", progOn: true, keySel: "F#", quality: "dominant", exts: ["7", "#9"],
+      prog: [{ root: "F#", quality: "dominant", exts: ["7", "#9"] }],
+    };
+    expect(parseViewQuery(viewQueryString(v, D), D)).toEqual(v);
+  });
+
+  it("does not serialize outside chord mode or when toggled off", () => {
+    expect(viewQueryString({ ...PROG, mode: "overlay" }, D)).not.toContain("prog=");
+    expect(viewQueryString({ ...PROG, progOn: false }, D)).not.toContain("prog=");
+  });
+
+  it("omits the single-chord params while a progression is active", () => {
+    const q = viewQueryString(PROG, D);
+    expect(q).not.toContain("key=");
+    expect(q).not.toContain("quality=");
+    expect(q).not.toContain("ext=");
+  });
+
+  it("still serializes the single chord once the progression is off", () => {
+    expect(viewQueryString({ ...PROG, progOn: false }, D))
+      .toBe("?mode=chord&key=D&ext=7%2Cb9");
+  });
+
+  it("turns the progression on when the param is present", () => {
+    expect(parseViewQuery("?mode=chord&prog=A%3Aminor%3A7", D))
+      .toMatchObject({ progOn: true, prog: [{ root: "A", quality: "minor", exts: ["7"] }] });
+  });
+
+  it("ignores the progression outside chord mode", () => {
+    expect(parseViewQuery("?mode=overlay&prog=A%3Aminor%3A7", D))
+      .toMatchObject({ progOn: false, prog: [] });
+  });
+
+  it("drops only the malformed chords", () => {
+    expect(parseViewQuery("?mode=chord&prog=A%3Aminor%3BH%3Aminor%3BD%3Anope%3BG%3Amajor", D).prog)
+      .toEqual([{ root: "A", quality: "minor", exts: [] }, { root: "G", quality: "major", exts: [] }]);
+  });
+
+  it("filters tensions the quality does not allow and normalizes order", () => {
+    expect(parseViewQuery("?mode=chord&prog=A%3Aminor%3A13%2Cb9%2C7", D).prog)
+      .toEqual([{ root: "A", quality: "minor", exts: ["7", "13"] }]);
+  });
+
+  it("truncates past MAX_PROG chords", () => {
+    const many = Array.from({ length: 12 }, () => "A%3Aminor").join("%3B");
+    expect(parseViewQuery(`?mode=chord&prog=${many}`, D).prog).toHaveLength(8);
+  });
+
+  it("clamps pi into range", () => {
+    expect(parseViewQuery("?mode=chord&prog=A%3Aminor%3BD%3Adominant&pi=9", D).progIndex).toBe(1);
+    expect(parseViewQuery("?mode=chord&prog=A%3Aminor%3BD%3Adominant&pi=-3", D).progIndex).toBe(0);
+    expect(parseViewQuery("?mode=chord&prog=A%3Aminor&pi=oops", D).progIndex).toBe(0);
+  });
+
+  it("falls back to the single chord when no entry survives", () => {
+    expect(parseViewQuery("?mode=chord&prog=H%3Anope", D))
+      .toMatchObject({ progOn: false, prog: [], progIndex: 0 });
+  });
+
+  it("mirrors the selected chord into the single-chord fields", () => {
+    expect(parseViewQuery("?mode=chord&prog=A%3Aminor%3A7%3BD%3Adominant%3A7&pi=1", D))
+      .toMatchObject({ keySel: "D", quality: "dominant", exts: ["7"] });
   });
 });
