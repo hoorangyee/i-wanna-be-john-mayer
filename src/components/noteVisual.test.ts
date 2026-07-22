@@ -24,7 +24,7 @@ describe("progNoteVisual — 현재 코드 음", () => {
     const v = progNoteVisual(note(), "degree");
     expect(v).toMatchObject({
       fill: "var(--tone-3)", fillOpacity: 1, stroke: null,
-      dashed: false, radius: 12, innerRing: null, labelFill: null,
+      dashed: false, radius: 12, halo: null, labelFill: null,
     });
   });
 
@@ -37,11 +37,11 @@ describe("progNoteVisual — 현재 코드 음", () => {
 describe("progNoteVisual — 공통음", () => {
   const common = note({ role: "common", nextDegree: "b7" });
 
-  it("안쪽 링이 붙고 도수 보기에서 두 도수를 쌓는다", () => {
+  it("후광 링이 붙고 도수 보기에서 두 도수를 쌓는다", () => {
     const v = progNoteVisual(common, "degree");
     expect(v).toMatchObject({
-      fillOpacity: 1, innerRing: "var(--prog-common)",
-      primary: "b3", secondary: "b7", radius: 13,
+      fillOpacity: 1, halo: "var(--prog-common)",
+      primary: "b3", secondary: "b7", radius: 12,
     });
   });
 
@@ -50,15 +50,15 @@ describe("progNoteVisual — 공통음", () => {
     expect(v).toMatchObject({ primary: "C", secondary: null, radius: 12 });
   });
 
-  it("라벨을 꺼도 안쪽 링은 남는다", () => {
+  it("라벨을 꺼도 후광 링은 남는다", () => {
     const v = progNoteVisual(common, "none");
-    expect(v).toMatchObject({ primary: null, secondary: null, innerRing: "var(--prog-common)" });
+    expect(v).toMatchObject({ primary: null, secondary: null, halo: "var(--prog-common)" });
   });
 
-  it("루트인 공통음은 바깥 링과 안쪽 링을 함께 쓴다", () => {
+  it("루트인 공통음은 바깥 링과 후광 링을 함께 쓴다", () => {
     const v = progNoteVisual(note({ role: "common", nextDegree: "5", degree: "1", isRoot: true }), "degree");
     expect(v.stroke).toBe("var(--note-root-ring)");
-    expect(v.innerRing).toBe("var(--prog-common)");
+    expect(v.halo).toBe("var(--prog-common)");
   });
 });
 
@@ -67,7 +67,7 @@ describe("progNoteVisual — 다음 코드 음", () => {
     const v = progNoteVisual(note({ role: "half", degree: "3" }), "degree");
     expect(v).toMatchObject({
       fill: "var(--tone-3)", fillOpacity: 0.3,
-      stroke: "var(--prog-half)", strokeWidth: 2.5, dashed: false,
+      stroke: "var(--prog-half)", strokeWidth: 2, dashed: false,
       labelFill: "var(--ink)", secondary: null,
     });
   });

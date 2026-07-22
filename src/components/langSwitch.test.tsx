@@ -20,6 +20,7 @@ const controlsProps = {
   boxIndex: null,
   boxCount: 5,
   overlayRoot: "A" as const,
+  progOn: false,
   onChange: () => {},
 };
 

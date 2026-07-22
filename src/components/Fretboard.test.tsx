@@ -274,17 +274,23 @@ describe("Fretboard progression", () => {
     expect(c.querySelector("[data-testid='note-6-10']")?.getAttribute("data-root")).toBe("false");
   });
 
-  it("gives common tones an inner ring and stacks both degrees", () => {
+  it("haloes common tones outside the circle and stacks both degrees", () => {
     const common = board().querySelector("[data-testid='note-6-5']")!;
-    expect(common.querySelectorAll("circle")).toHaveLength(2); // 원 + 안쪽 링
-    expect(common.querySelector("circle")?.getAttribute("r")).toBe("13");
+    const [halo, dot] = common.querySelectorAll("circle");
+    expect(halo.getAttribute("stroke")).toBe("var(--prog-common)");
+    // 후광이 바깥에 있어야 2줄 라벨을 관통하지 않는다
+    expect(Number(halo.getAttribute("r"))).toBeGreaterThan(Number(dot.getAttribute("r")));
     expect([...common.querySelectorAll("text")].map((t) => t.textContent)).toEqual(["1", "5"]);
   });
 
   it("keeps common tones to one line when showing note names", () => {
     const common = board("name").querySelector("[data-testid='note-6-5']")!;
     expect([...common.querySelectorAll("text")].map((t) => t.textContent)).toEqual(["A"]);
-    expect(common.querySelector("circle")?.getAttribute("r")).toBe("12");
+  });
+
+  it("paints ghost labels in ink so they read on the washed-out fill", () => {
+    const ghost = board().querySelector("[data-testid='note-6-2'] text") as SVGTextElement;
+    expect(ghost.style.fill).toBe("var(--ink)");
   });
 
   it("draws next-chord tones as ghosts — solid ring for half steps, dashed otherwise", () => {

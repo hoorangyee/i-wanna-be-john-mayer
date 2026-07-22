@@ -16,6 +16,7 @@ const baseProps = {
   boxIndex: null,
   boxCount: 5,
   overlayRoot: "A" as const,
+  progOn: false,
   onChange: vi.fn(),
 };
 
@@ -132,5 +133,32 @@ describe("Controls (overlay mode)", () => {
     expect(getByLabelText("Chord")).not.toBeNull();
     expect(getByRole("group", { name: "Extensions" })).not.toBeNull();
     expect(queryByRole("group", { name: "Position" })).toBeNull();
+  });
+});
+
+describe("Controls progression toggle", () => {
+  it("appears in chord mode only", () => {
+    const { queryByRole, rerender } = render(<Controls {...baseProps} mode="chord" />);
+    expect(queryByRole("button", { name: "Progression" })).not.toBeNull();
+
+    rerender(<Controls {...baseProps} mode="scale" />);
+    expect(queryByRole("button", { name: "Progression" })).toBeNull();
+    rerender(<Controls {...baseProps} mode="overlay" />);
+    expect(queryByRole("button", { name: "Progression" })).toBeNull();
+  });
+
+  it("reflects and flips the current state", () => {
+    const onChange = vi.fn();
+    const { getByRole, rerender } = render(
+      <Controls {...baseProps} mode="chord" onChange={onChange} />
+    );
+    const toggle = getByRole("button", { name: "Progression" });
+    expect(toggle.getAttribute("aria-pressed")).toBe("false");
+    fireEvent.click(toggle);
+    expect(onChange).toHaveBeenCalledWith({ progOn: true });
+
+    rerender(<Controls {...baseProps} mode="chord" progOn onChange={onChange} />);
+    fireEvent.click(getByRole("button", { name: "Progression" }));
+    expect(onChange).toHaveBeenLastCalledWith({ progOn: false });
   });
 });

@@ -10,7 +10,8 @@ export interface NoteVisual {
   strokeWidth: number;
   dashed: boolean;
   radius: number;
-  innerRing: string | null;  // 공통음 표시 — 원 안쪽에 한 겹 더
+  /** 공통음 표시 — 원 바깥에 한 겹 더. 안쪽에 두면 2줄 라벨을 관통한다. */
+  halo: string | null;
   primary: string | null;    // 라벨 윗줄
   secondary: string | null;  // 라벨 아랫줄 (공통음의 다음 코드 도수)
   labelFill: string | null;  // null = 기본 흰색(.note-label)
@@ -32,7 +33,7 @@ export function degreeFill(degree: string): string {
 }
 
 const GHOST_RING: Record<"half" | "other", { stroke: string; strokeWidth: number; dashed: boolean }> = {
-  half: { stroke: "var(--prog-half)", strokeWidth: 2.5, dashed: false },
+  half: { stroke: "var(--prog-half)", strokeWidth: 2, dashed: false },
   other: { stroke: "var(--prog-other)", strokeWidth: 1.5, dashed: true },
 };
 
@@ -56,8 +57,8 @@ export function progNoteVisual(info: ProgNoteInfo, labelMode: LabelMode): NoteVi
     stroke: ring?.stroke ?? rootRing?.stroke ?? null,
     strokeWidth: ring?.strokeWidth ?? rootRing?.strokeWidth ?? 0,
     dashed: ring?.dashed ?? false,
-    radius: secondary ? 13 : 12, // 두 줄 라벨만 반지름을 키운다
-    innerRing: info.role === "common" ? "var(--prog-common)" : null,
+    radius: 12,
+    halo: info.role === "common" ? "var(--prog-common)" : null,
     primary: labelMode === "name" ? info.name : labelMode === "degree" ? info.degree : null,
     secondary,
     labelFill: ghost ? "var(--ink)" : null, // 옅은 면 위에서는 흰 글씨가 읽히지 않는다

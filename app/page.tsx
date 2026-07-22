@@ -1,12 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { scaleNoteMap } from "@/theory/scales";
 import { chordSymbol, chordToneMap } from "@/theory/chords";
+import {
+  insertAfter, progChordLabel, progNoteMap, removeAt, type ProgChord,
+} from "@/theory/progression";
 import { boxesFor } from "@/theory/boxes";
 import { playPosition } from "@/audio/tone";
 import { Fretboard } from "@/components/Fretboard";
 import { Controls } from "@/components/Controls";
+import { ProgressionBar } from "@/components/ProgressionBar";
 import { ModeTabs } from "@/components/ModeTabs";
 import { SoundToggle } from "@/components/SoundToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -26,7 +30,13 @@ const DEFAULT_VIEW: UrlViewState = {
   labelMode: "name",
   boxIndex: null,
   overlayRoot: "A",
+  progOn: false,
+  prog: [],
+  progIndex: 0,
 };
+
+const progActiveIn = (v: UrlViewState) =>
+  v.mode === "chord" && v.progOn && v.prog.length > 0;
 
 function PickIcon() {
   return (
@@ -55,23 +65,84 @@ function HomeInner() {
   const isChord = view.mode === "chord";
   const isOverlay = view.mode === "overlay";
   const isQuiz = view.mode === "quiz";
+  const isProg = progActiveIn(view);
+
+  // 진행 중에는 단일 코드 컨트롤이 선택된 코드의 편집기가 된다
+  const patch = useCallback((p: Partial<UrlViewState>) => {
+    setView((v) => {
+      // 진행을 처음 켜면 지금 보던 코드가 첫 항목이 된다 — 상태를 잃지 않고 이어진다
+      if (p.progOn === true && v.prog.length === 0) {
+        return {
+          ...v, ...p,
+          prog: [{ root: v.keySel, quality: v.quality, exts: v.exts }],
+          progIndex: 0,
+        };
+      }
+      const editsChord =
+        p.keySel !== undefined || p.quality !== undefined || p.exts !== undefined;
+      if (!progActiveIn(v) || !editsChord) return { ...v, ...p };
+      const cur = v.prog[v.progIndex];
+      const edited: ProgChord = {
+        root: p.keySel ?? cur.root,
+        quality: p.quality ?? cur.quality,
+        exts: p.exts ?? cur.exts,
+      };
+      return {
+        ...v, ...p,
+        prog: v.prog.map((c, i) => (i === v.progIndex ? edited : c)),
+        // 단일 코드 필드는 언제나 지금 보이는 코드를 비춘다 — 진행을 끄면 그 코드로 이어진다
+        keySel: edited.root, quality: edited.quality, exts: edited.exts,
+      };
+    });
+  }, []);
+
+  const selectProgChord = useCallback((i: number) => {
+    setView((v) => {
+      const c = v.prog[i];
+      return { ...v, progIndex: i, keySel: c.root, quality: c.quality, exts: c.exts };
+    });
+  }, []);
+
+  const progEdit = useCallback((op: typeof insertAfter) => {
+    setView((v) => {
+      const { prog, index } = op(v.prog, v.progIndex);
+      const c = prog[index];
+      return { ...v, prog, progIndex: index, keySel: c.root, quality: c.quality, exts: c.exts };
+    });
+  }, []);
 
   const notes = isChord
     ? chordToneMap(view.keySel, view.quality, view.exts)
     : scaleNoteMap(view.keySel, view.scaleId);
   const overlayNotes = isOverlay ? chordToneMap(view.overlayRoot, view.quality, view.exts) : undefined;
+  // 마지막 코드의 "다음"은 첫 코드 — 진행은 도는 것이다. 하나뿐이면 다음이 없다.
+  const progNotes = isProg
+    ? progNoteMap(
+        view.prog[view.progIndex],
+        view.prog.length > 1 ? view.prog[(view.progIndex + 1) % view.prog.length] : null
+      )
+    : undefined;
   const boxes = view.mode === "scale" ? boxesFor(view.keySel, view.scaleId) : null;
   const activeWindow = view.boxIndex !== null && boxes ? boxes[view.boxIndex] : null;
 
   const scaleName = SCALE_NAMES[lang][view.scaleId];
   const symbol = chordSymbol(view.quality, view.exts);
-  const title = isChord
-    ? m.titleChord(view.keySel, symbol, QUALITY_NAMES[lang][view.quality])
-    : isOverlay
-      ? m.titleOverlay(view.keySel, scaleName, view.overlayRoot, symbol)
-      : m.titleScale(view.keySel, scaleName, view.boxIndex);
+  const title = isProg
+    ? m.titleProgression(
+        progChordLabel(view.prog[view.progIndex]),
+        view.prog.length > 1
+          ? progChordLabel(view.prog[(view.progIndex + 1) % view.prog.length])
+          : null,
+        view.progIndex + 1,
+        view.prog.length
+      )
+    : isChord
+      ? m.titleChord(view.keySel, symbol, QUALITY_NAMES[lang][view.quality])
+      : isOverlay
+        ? m.titleOverlay(view.keySel, scaleName, view.overlayRoot, symbol)
+        : m.titleScale(view.keySel, scaleName, view.boxIndex);
 
-  const legendMode = isChord ? "chord" : isOverlay ? "overlay" : "scale";
+  const legendMode = isProg ? "progression" : isChord ? "chord" : isOverlay ? "overlay" : "scale";
 
   return (
     <>
@@ -83,7 +154,7 @@ function HomeInner() {
           </h1>
           <nav className="order-last w-full sm:order-none sm:w-auto sm:flex-1" aria-label={m.modeNav}>
             <div className="flex sm:justify-center">
-              <ModeTabs mode={view.mode} onSelect={(patch) => setView((v) => ({ ...v, ...patch }))} />
+              <ModeTabs mode={view.mode} onSelect={patch} />
             </div>
           </nav>
           <div className="ml-auto flex items-center gap-2">
@@ -111,8 +182,18 @@ function HomeInner() {
                 boxIndex={view.boxIndex}
                 boxCount={boxes ? boxes.length : null}
                 overlayRoot={view.overlayRoot}
-                onChange={(patch) => setView((v) => ({ ...v, ...patch }))}
+                progOn={view.progOn}
+                onChange={patch}
               />
+              {isProg && (
+                <ProgressionBar
+                  prog={view.prog}
+                  index={view.progIndex}
+                  onSelect={selectProgChord}
+                  onInsert={() => progEdit(insertAfter)}
+                  onRemove={() => progEdit(removeAt)}
+                />
+              )}
             </div>
             <section className="card">
               <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-line px-5 py-3.5">
@@ -126,6 +207,7 @@ function HomeInner() {
                   window={activeWindow}
                   colorMode={isChord ? "degree" : "root"}
                   overlay={overlayNotes}
+                  progression={progNotes}
                   onNoteClick={playPosition}
                 />
               </div>

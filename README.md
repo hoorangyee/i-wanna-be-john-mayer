@@ -16,6 +16,9 @@ Pick a root and a chord quality — **Major, Minor, Dominant, Diminished, Half-d
 
 ![Chord tones with 7th and 9th enabled](docs/screenshots/chord-extensions.png)
 
+### 🔗 Progression Mode
+Flip on **Progression** in chord mode and the single chord becomes a list you build one chord at a time — `Am7 · D7 · Gmaj7` — with the same root, quality, and tension controls now editing whichever chord you've selected. The fretboard shows the current chord solid and the *next* one ghosted on top, sorting every note into what it means for the move: notes shared by both chords get a halo (stay put), notes a half step from where your hand already is get a solid ring, everything else a dashed one. With degrees showing, shared notes stack both readings — the ♭3 of Am7 is the ♭7 of D7, same finger, new job. Step through with ← / → and the progression loops, so the last chord's "next" is the first.
+
 ### 🫥 Overlay Mode
 Lay chord tones over a dimmed scale to practice targeting chord tones while soloing — with an independent chord root, so you can see, say, E7 arpeggio notes inside the A blues scale.
 

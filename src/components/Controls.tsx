@@ -19,10 +19,11 @@ export interface ControlsProps {
   boxIndex: number | null;
   boxCount: number | null;   // null = 이 스케일은 박스 미지원 (코드 모드에서도 null 전달)
   overlayRoot: Key;
+  progOn: boolean;
   onChange: (patch: Partial<Omit<ControlsProps, "onChange" | "boxCount">>) => void;
 }
 
-export function Controls({ mode, keySel, scaleId, quality, exts, labelMode, boxIndex, boxCount, overlayRoot, onChange }: ControlsProps) {
+export function Controls({ mode, keySel, scaleId, quality, exts, labelMode, boxIndex, boxCount, overlayRoot, progOn, onChange }: ControlsProps) {
   const { lang } = useLang();
   const m = MESSAGES[lang];
   const LABEL_MODES: { id: LabelMode; label: string }[] = [
@@ -110,6 +111,16 @@ export function Controls({ mode, keySel, scaleId, quality, exts, labelMode, boxI
           </button>
         ))}
       </div>
+
+      {/* 진행은 코드톤 모드 전용 — 오버레이는 스케일 레이어가 이미 두 겹이라 제외 */}
+      {mode === "chord" && (
+        <div className="seg">
+          <button type="button" data-active={progOn} aria-pressed={progOn}
+                  onClick={() => onChange({ progOn: !progOn })}>
+            {m.progToggle}
+          </button>
+        </div>
+      )}
 
       {mode === "scale" && boxCount !== null && (
         <div className="seg" role="group" aria-label={m.positionGroup}>

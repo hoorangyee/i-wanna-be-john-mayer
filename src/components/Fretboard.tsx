@@ -132,7 +132,7 @@ export function Fretboard({ notes, labelMode, window = null, colorMode = "root",
                 strokeWidth: info.isRoot && (!overlay || isOverlayNote) ? 3 : 0,
                 dashed: false,
                 radius: 12,
-                innerRing: null,
+                halo: null,
                 primary: labelMode === "name" ? info.name
                        : labelMode === "degree" ? info.degree : null,
                 secondary: null,
@@ -150,30 +150,32 @@ export function Fretboard({ notes, labelMode, window = null, colorMode = "root",
                {...(overlay && !progression ? { "data-layer": isOverlayNote ? "overlay" : "scale" } : {})}
                {...(onNoteClick ? { onClick: () => onNoteClick({ str, fret }), style: { cursor: "pointer" } as const } : {})}
                opacity={dimmed ? 0.18 : overlay && !progression && !isOverlayNote ? 0.45 : 1}>
+              {/* 공통음 후광은 원 바깥에 — 안쪽에 두면 2줄 라벨을 관통한다 */}
+              {v.halo && (
+                <circle cx={cx} cy={cy} r={v.radius + 2.5} fill="none"
+                        stroke={v.halo} strokeWidth={1.5} />
+              )}
               <circle cx={cx} cy={cy} r={v.radius}
                       fill={v.fill}
                       fillOpacity={v.fillOpacity}
                       stroke={v.stroke ?? "none"}
                       strokeWidth={v.strokeWidth}
                       strokeDasharray={v.dashed ? "3 3" : undefined} />
-              {v.innerRing && (
-                <circle cx={cx} cy={cy} r={v.radius - 4.5} fill="none"
-                        stroke={v.innerRing} strokeWidth={1.5} />
-              )}
               {v.secondary ? (
                 <>
-                  <text x={cx} y={cy - 1} textAnchor="middle" className="note-label dual"
-                        {...(v.labelFill ? { fill: v.labelFill } : {})}>
+                  {/* fill은 CSS가 이기므로 style로 덮는다 */}
+                  <text x={cx} y={cy - 2} textAnchor="middle" className="note-label dual"
+                        style={v.labelFill ? { fill: v.labelFill } : undefined}>
                     {v.primary}
                   </text>
-                  <text x={cx} y={cy + 8} textAnchor="middle" className="note-label sub"
-                        {...(v.labelFill ? { fill: v.labelFill } : {})}>
+                  <text x={cx} y={cy + 7} textAnchor="middle" className="note-label sub"
+                        style={v.labelFill ? { fill: v.labelFill } : undefined}>
                     {v.secondary}
                   </text>
                 </>
               ) : v.primary && (
                 <text x={cx} y={cy + 4} textAnchor="middle" className="note-label"
-                      {...(v.labelFill ? { fill: v.labelFill } : {})}>
+                      style={v.labelFill ? { fill: v.labelFill } : undefined}>
                   {v.primary}
                 </text>
               )}
