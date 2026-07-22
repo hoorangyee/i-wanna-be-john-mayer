@@ -36,8 +36,13 @@ export interface Messages {
   legend: string; legendRoot: string; legendRoot1: string; legendScaleNote: string;
   legendThird: string; legendFifth: string; legendSeventh: string;
   legendNinth: string; legendEleventh: string; legendThirteenth: string;
+  legendCommon: string; legendHalf: string; legendOther: string;
   extensions: string;
   extAltered: Record<"b9" | "#9" | "#11" | "b13", string>;
+  // 진행
+  progToggle: string; progGroup: string; progAdd: string; progRemove: string;
+  progHint: string;
+  progChipLabel: (n: number, symbol: string) => string;
   // 지판
   fretboard: string;
   hitLabel: (str: number, fret: number) => string;
@@ -66,6 +71,7 @@ export interface Messages {
   titleScale: (key: string, scaleName: string, box: number | null) => string;
   titleChord: (key: string, symbol: string, chordName: string) => string;
   titleOverlay: (key: string, scaleName: string, root: string, symbol: string) => string;
+  titleProgression: (current: string, next: string | null, i: number, total: number) => string;
 }
 
 export const MESSAGES: Record<Lang, Messages> = {
@@ -78,10 +84,16 @@ export const MESSAGES: Record<Lang, Messages> = {
     legend: "Legend", legendRoot: "Root", legendRoot1: "Root (1)", legendScaleNote: "Scale notes",
     legendThird: "3rd", legendFifth: "5th", legendSeventh: "7th",
     legendNinth: "9th", legendEleventh: "11th", legendThirteenth: "13th", extensions: "Extensions",
+    legendCommon: "Common tone", legendHalf: "A half step away", legendOther: "Other next-chord tone",
     extAltered: {
       b9: "b9, flat ninth", "#9": "#9, sharp ninth",
       "#11": "#11, sharp eleventh", b13: "b13, flat thirteenth",
     },
+    progToggle: "Progression", progGroup: "Progression chords",
+    progAdd: "Add a chord after the selected one",
+    progRemove: "Remove the selected chord",
+    progHint: "Add one more chord to see how the two connect.",
+    progChipLabel: (n, symbol) => `Chord ${n}: ${symbol}`,
     fretboard: "Guitar fretboard",
     hitLabel: (str, fret) => `String ${str}, fret ${fret}`,
     soundOn: "Sound on", soundOff: "Sound off",
@@ -110,6 +122,8 @@ export const MESSAGES: Record<Lang, Messages> = {
     titleChord: (key, symbol, chordName) => `${key}${symbol} — ${chordName} Chord Tones`,
     titleOverlay: (key, scaleName, root, symbol) =>
       `${key} ${scaleName} + ${root}${symbol} Chord Tones`,
+    titleProgression: (current, next, i, total) =>
+      `${current}${next ? ` → ${next}` : ""} · ${i}/${total}`,
   },
   ko: {
     modeScale: "스케일", modeChord: "코드톤", modeOverlay: "오버레이", modeQuiz: "퀴즈",
@@ -120,10 +134,16 @@ export const MESSAGES: Record<Lang, Messages> = {
     legend: "범례", legendRoot: "루트", legendRoot1: "루트 (1)", legendScaleNote: "스케일음",
     legendThird: "3도", legendFifth: "5도", legendSeventh: "7도",
     legendNinth: "9도", legendEleventh: "11도", legendThirteenth: "13도", extensions: "확장",
+    legendCommon: "공통음", legendHalf: "반음 거리", legendOther: "그 외 다음 코드 음",
     extAltered: {
       b9: "b9, 플랫 9도", "#9": "#9, 샤프 9도",
       "#11": "#11, 샤프 11도", b13: "b13, 플랫 13도",
     },
+    progToggle: "진행", progGroup: "진행 코드",
+    progAdd: "선택한 코드 뒤에 추가",
+    progRemove: "선택한 코드 삭제",
+    progHint: "코드를 하나 더 추가하면 연결이 보입니다.",
+    progChipLabel: (n, symbol) => `${n}번 코드: ${symbol}`,
     fretboard: "기타 지판",
     hitLabel: (str, fret) => `${str}번 줄 ${fret}프렛`,
     soundOn: "소리 켬", soundOff: "소리 끔",
@@ -152,6 +172,8 @@ export const MESSAGES: Record<Lang, Messages> = {
     titleChord: (key, symbol, chordName) => `${key}${symbol} — ${chordName} 코드톤`,
     titleOverlay: (key, scaleName, root, symbol) =>
       `${key} ${scaleName} + ${root}${symbol} 코드톤`,
+    titleProgression: (current, next, i, total) =>
+      `${current}${next ? ` → ${next}` : ""} · ${i}/${total}`,
   },
 };
 

@@ -50,3 +50,25 @@ describe("Legend", () => {
     expect(getByText("13th")).not.toBeNull();
   });
 });
+
+describe("Legend progression mode", () => {
+  it("keeps the degree swatches and adds the three role swatches", () => {
+    const { getByText, queryByText } = render(<Legend mode="progression" exts={["7"]} />);
+    for (const label of ["Root (1)", "3rd", "5th", "7th"]) {
+      expect(getByText(label)).not.toBeNull();
+    }
+    for (const label of ["Common tone", "A half step away", "Other next-chord tone"]) {
+      expect(getByText(label)).not.toBeNull();
+    }
+    expect(queryByText("Scale notes")).toBeNull();
+  });
+
+  it("distinguishes the role swatches by ring rather than color", () => {
+    const { getByText } = render(<Legend mode="progression" />);
+    const swatch = (label: string) =>
+      (getByText(label).firstElementChild as HTMLElement).getAttribute("style") ?? "";
+    expect(swatch("Common tone")).toContain("var(--prog-common)");
+    expect(swatch("A half step away")).toContain("solid");
+    expect(swatch("Other next-chord tone")).toContain("dashed");
+  });
+});
