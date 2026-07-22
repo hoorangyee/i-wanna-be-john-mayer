@@ -3,6 +3,7 @@ import { render, fireEvent } from "@testing-library/react";
 import { Fretboard, type QuizMark } from "./Fretboard";
 import { scaleNoteMap } from "@/theory/scales";
 import { chordToneMap } from "@/theory/chords";
+import { progNoteMap } from "@/theory/progression";
 
 describe("Fretboard", () => {
   const notes = scaleNoteMap("A", "minorPentatonic");
@@ -237,5 +238,73 @@ describe("Fretboard quiz interaction", () => {
     );
     fireEvent.click(container.querySelector("[data-testid='note-6-5']")!);
     expect(onClick).toHaveBeenCalledWith({ str: 6, fret: 5 });
+  });
+});
+
+describe("Fretboard progression", () => {
+  // Am7 → D7: A·C 공통, E·G 현재, F#는 G에서 반음, D는 그 외
+  const prog = progNoteMap(
+    { root: "A", quality: "minor", exts: ["7"] },
+    { root: "D", quality: "dominant", exts: ["7"] }
+  );
+  const notes = chordToneMap("A", "minor", ["7"]);
+  const board = (labelMode: "name" | "degree" | "none" = "degree") =>
+    render(<Fretboard notes={notes} labelMode={labelMode} progression={prog} />).container;
+
+  const roleAt = (c: HTMLElement, testid: string) =>
+    c.querySelector(`[data-testid='${testid}']`)?.getAttribute("data-role");
+
+  it("tags every rendered note with its role (6현 기준)", () => {
+    const c = board();
+    expect(roleAt(c, "note-6-5")).toBe("common");   // A
+    expect(roleAt(c, "note-6-8")).toBe("common");   // C
+    expect(roleAt(c, "note-6-0")).toBe("current");  // E
+    expect(roleAt(c, "note-6-3")).toBe("current");  // G
+    expect(roleAt(c, "note-6-2")).toBe("half");     // F# — G에서 반음
+    expect(roleAt(c, "note-6-10")).toBe("other");   // D
+  });
+
+  it("renders nothing outside the two chords", () => {
+    expect(roleAt(board(), "note-6-1")).toBeUndefined(); // F는 어느 코드에도 없다
+  });
+
+  it("keeps the root ring on the current chord root only", () => {
+    const c = board();
+    expect(c.querySelector("[data-testid='note-6-5']")?.getAttribute("data-root")).toBe("true");
+    expect(c.querySelector("[data-testid='note-6-10']")?.getAttribute("data-root")).toBe("false");
+  });
+
+  it("gives common tones an inner ring and stacks both degrees", () => {
+    const common = board().querySelector("[data-testid='note-6-5']")!;
+    expect(common.querySelectorAll("circle")).toHaveLength(2); // 원 + 안쪽 링
+    expect(common.querySelector("circle")?.getAttribute("r")).toBe("13");
+    expect([...common.querySelectorAll("text")].map((t) => t.textContent)).toEqual(["1", "5"]);
+  });
+
+  it("keeps common tones to one line when showing note names", () => {
+    const common = board("name").querySelector("[data-testid='note-6-5']")!;
+    expect([...common.querySelectorAll("text")].map((t) => t.textContent)).toEqual(["A"]);
+    expect(common.querySelector("circle")?.getAttribute("r")).toBe("12");
+  });
+
+  it("draws next-chord tones as ghosts — solid ring for half steps, dashed otherwise", () => {
+    const c = board();
+    const half = c.querySelector("[data-testid='note-6-2'] circle")!;
+    expect(half.getAttribute("fill-opacity")).toBe("0.3");
+    expect(half.getAttribute("stroke")).toBe("var(--prog-half)");
+    expect(half.getAttribute("stroke-dasharray")).toBeNull();
+
+    const other = c.querySelector("[data-testid='note-6-10'] circle")!;
+    expect(other.getAttribute("stroke")).toBe("var(--prog-other)");
+    expect(other.getAttribute("stroke-dasharray")).toBe("3 3");
+  });
+
+  it("ignores the overlay layer while a progression is shown", () => {
+    const { container } = render(
+      <Fretboard notes={notes} labelMode="degree" progression={prog}
+                 overlay={chordToneMap("E", "dominant", ["7"])} />
+    );
+    expect(container.querySelector("[data-layer]")).toBeNull();
+    expect(roleAt(container, "note-6-2")).toBe("half");
   });
 });

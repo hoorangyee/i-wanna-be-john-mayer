@@ -29,6 +29,10 @@
   --tone-9: #b0813a;
   --tone-11: #3e8f96;
   --tone-13: #b05a9e; /* 로즈 마젠타 — 흰 라벨 대비 4.37:1, 루트 코럴 로즈·7 퍼플과 구분 */
+  /* 진행 모드 링 — 도수 색 원 위/보드 배경 위에 얹히므로 면이 아니라 선 대비로 고른다 */
+  --prog-common: #ffffff; /* 공통음 안쪽 링 — 모든 도수 색 위에서 또렷 */
+  --prog-half: #1f2430;   /* 반음 이동 바깥 링 — 잉크 톤으로 "여기를 짚어라" */
+  --prog-other: #9aa1b0;  /* 그 외 다음 코드 음 — 점선, 한 단계 물러난 톤 */
   --mark-question: #e0a83c;
   --mark-correct: #3d8b6b;
   --mark-wrong: #c05252;
@@ -62,6 +66,9 @@
   --tone-9: #b0813a; /* 흰 라벨 대비 3.47:1 — 다크 팔레트 하한선(3.2) 준수 */
   --tone-11: #4a9ea6;
   --tone-13: #c06aae; /* 흰 라벨 대비 3.55:1 — 다크 팔레트 하한선(3.2) 준수 */
+  --prog-common: #ffffff;
+  --prog-half: #e6e8ee;
+  --prog-other: #6f7784;
   --mark-question: #d9a43a;
   --mark-correct: #46996f;
   --mark-wrong: #d16060;
@@ -253,6 +260,9 @@ body {
 .fretboard { width: 100%; height: auto; display: block; }
 .board-scroll { overflow-x: auto; }
 .fretboard .note-label { font-size: 11px; font-weight: 700; fill: #fff; }
+/* 공통음 2줄 라벨 — 현재 코드 도수 위, 다음 코드 도수 아래 */
+.fretboard .note-label.dual { font-size: 10px; }
+.fretboard .note-label.sub { font-size: 8px; opacity: 0.85; }
 .fretboard .fret-no { font-size: 12px; fill: var(--ink-muted); font-variant-numeric: tabular-nums; }
 
 /* 노트 프레스 피드백 + 마크 등장 모션 */

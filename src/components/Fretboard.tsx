@@ -1,11 +1,13 @@
 import type { PitchClass } from "@/theory/notes";
 import { FRET_COUNT, STRINGS, pitchAt, posKey, type FretPos, type StringNo } from "@/theory/fretboard";
 import type { NoteInfo } from "@/theory/scales";
+import type { ProgNoteInfo } from "@/theory/progression";
 import type { FretWindow } from "@/theory/boxes";
+import { degreeFill, progNoteVisual, type LabelMode, type NoteVisual } from "./noteVisual";
 import { MESSAGES } from "@/lib/i18n";
 import { useLang } from "@/lib/LangContext";
 
-export type LabelMode = "name" | "degree" | "none";
+export type { LabelMode };
 
 export type QuizMarkKind = "question" | "correct" | "wrong" | "reveal";
 
@@ -26,6 +28,8 @@ export interface FretboardProps {
   marks?: ReadonlyMap<string, QuizMark>;
   activeRegion?: { strings: readonly StringNo[]; fretMax: number } | null;
   overlay?: Map<PitchClass, NoteInfo>;
+  /** 진행 모드 — 주어지면 노트 레이어를 이쪽이 담당하고 notes/overlay는 쓰이지 않는다. */
+  progression?: ReadonlyMap<PitchClass, ProgNoteInfo>;
 }
 
 const W = 1180;
@@ -39,27 +43,12 @@ const FRET_W = (W - NUT_X - RIGHT_PAD) / FRET_COUNT;
 const SINGLE_INLAYS = [3, 5, 7, 9, 15, 17, 19, 21];
 const FRET_NUMBERS = [...SINGLE_INLAYS, 12].sort((a, b) => a - b);
 
-// 주의: degreeFill이 변화표(b·#)를 일괄 제거하므로 b5·#5·bb7·b9·#9·#11·b13도 해당 슬롯 색이 된다.
-const TONE_FILL: Record<string, string> = {
-  "1": "var(--note-root)",
-  "3": "var(--tone-3)",
-  "5": "var(--tone-5)",
-  "7": "var(--tone-7)",
-  "9": "var(--tone-9)",
-  "11": "var(--tone-11)",
-  "13": "var(--tone-13)",
-};
-
-function degreeFill(degree: string): string {
-  return TONE_FILL[degree.replace(/[b#]/g, "")] ?? "var(--note-scale)";
-}
-
 const stringY = (str: StringNo) => TOP_Y + (str - 1) * STRING_GAP;
 const fretX = (fret: number) => NUT_X + fret * FRET_W;          // 프렛선 x
 const noteX = (fret: number) =>
   fret === 0 ? OPEN_X : NUT_X + (fret - 0.5) * FRET_W;          // 노트 중심 x
 
-export function Fretboard({ notes, labelMode, window = null, colorMode = "root", interactive = false, interactivePositions, onPositionClick, onNoteClick, marks, activeRegion = null, overlay }: FretboardProps) {
+export function Fretboard({ notes, labelMode, window = null, colorMode = "root", interactive = false, interactivePositions, onPositionClick, onNoteClick, marks, activeRegion = null, overlay, progression }: FretboardProps) {
   const { lang } = useLang();
   const m = MESSAGES[lang];
   const midY = (stringY(3) + stringY(4)) / 2;
@@ -121,38 +110,71 @@ export function Fretboard({ notes, labelMode, window = null, colorMode = "root",
       {STRINGS.flatMap((str) =>
         Array.from({ length: FRET_COUNT + 1 }, (_, fret) => {
           const pc = pitchAt({ str, fret });
-          const overlayInfo = overlay?.get(pc);
-          const info = overlayInfo ?? notes.get(pc);
+          const progInfo = progression?.get(pc);
+          if (progression && !progInfo) return null;
+          const overlayInfo = progression ? undefined : overlay?.get(pc);
+          const info = progInfo ?? overlayInfo ?? notes.get(pc);
           if (!info) return null;
           const isOverlayNote = overlayInfo !== undefined;
           const dimmed = window ? fret < window.start || fret > window.end : false;
-          const label = labelMode === "name" ? info.name
-                      : labelMode === "degree" ? info.degree : null;
-          const fill = isOverlayNote
-            ? degreeFill(info.degree)
-            : overlay
-              ? "var(--note-dim)"
-              : colorMode === "degree"
-                ? degreeFill(info.degree)
-                : info.isRoot ? "var(--note-root)" : "var(--note-scale)";
-          const ring = info.isRoot && (!overlay || isOverlayNote);
+          const v: NoteVisual = progInfo
+            ? progNoteVisual(progInfo, labelMode)
+            : {
+                fill: isOverlayNote
+                  ? degreeFill(info.degree)
+                  : overlay
+                    ? "var(--note-dim)"
+                    : colorMode === "degree"
+                      ? degreeFill(info.degree)
+                      : info.isRoot ? "var(--note-root)" : "var(--note-scale)",
+                fillOpacity: 1,
+                stroke: info.isRoot && (!overlay || isOverlayNote) ? "var(--note-root-ring)" : null,
+                strokeWidth: info.isRoot && (!overlay || isOverlayNote) ? 3 : 0,
+                dashed: false,
+                radius: 12,
+                innerRing: null,
+                primary: labelMode === "name" ? info.name
+                       : labelMode === "degree" ? info.degree : null,
+                secondary: null,
+                labelFill: null,
+              };
+          const cx = noteX(fret);
+          const cy = stringY(str);
           return (
             <g key={`${str}-${fret}`}
                className="note"
                data-testid={`note-${str}-${fret}`}
                data-root={info.isRoot ? "true" : "false"}
                data-dimmed={dimmed ? "true" : "false"}
-               {...(overlay ? { "data-layer": isOverlayNote ? "overlay" : "scale" } : {})}
+               {...(progInfo ? { "data-role": progInfo.role } : {})}
+               {...(overlay && !progression ? { "data-layer": isOverlayNote ? "overlay" : "scale" } : {})}
                {...(onNoteClick ? { onClick: () => onNoteClick({ str, fret }), style: { cursor: "pointer" } as const } : {})}
-               opacity={dimmed ? 0.18 : overlay && !isOverlayNote ? 0.45 : 1}>
-              <circle cx={noteX(fret)} cy={stringY(str)} r={12}
-                      fill={fill}
-                      stroke={ring ? "var(--note-root-ring)" : "none"}
-                      strokeWidth={ring ? 3 : 0} />
-              {label && (
-                <text x={noteX(fret)} y={stringY(str) + 4} textAnchor="middle"
-                      className="note-label">
-                  {label}
+               opacity={dimmed ? 0.18 : overlay && !progression && !isOverlayNote ? 0.45 : 1}>
+              <circle cx={cx} cy={cy} r={v.radius}
+                      fill={v.fill}
+                      fillOpacity={v.fillOpacity}
+                      stroke={v.stroke ?? "none"}
+                      strokeWidth={v.strokeWidth}
+                      strokeDasharray={v.dashed ? "3 3" : undefined} />
+              {v.innerRing && (
+                <circle cx={cx} cy={cy} r={v.radius - 4.5} fill="none"
+                        stroke={v.innerRing} strokeWidth={1.5} />
+              )}
+              {v.secondary ? (
+                <>
+                  <text x={cx} y={cy - 1} textAnchor="middle" className="note-label dual"
+                        {...(v.labelFill ? { fill: v.labelFill } : {})}>
+                    {v.primary}
+                  </text>
+                  <text x={cx} y={cy + 8} textAnchor="middle" className="note-label sub"
+                        {...(v.labelFill ? { fill: v.labelFill } : {})}>
+                    {v.secondary}
+                  </text>
+                </>
+              ) : v.primary && (
+                <text x={cx} y={cy + 4} textAnchor="middle" className="note-label"
+                      {...(v.labelFill ? { fill: v.labelFill } : {})}>
+                  {v.primary}
                 </text>
               )}
             </g>
